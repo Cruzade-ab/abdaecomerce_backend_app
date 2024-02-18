@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  role_id   Int    @id @default(autoincrement())
+  role_type String
+  User      User[]
+}
+
+model User {
+  user_id   Int     @id @default(autoincrement())
+  name      String
+  last_name String
+  email     String  @unique
+  password  String
+  role_id   Int
+  Role      Role    @relation(fields: [role_id], references: [role_id])
+  Order     Order[]
+}
+
+
+
+model Color {
+  color_id   Int       @id @default(autoincrement())
+  color_name String
+  products   Product[]
+}
+
+
+model Brand {
+  brand_id   Int       @id @default(autoincrement())
+  brand_name String
+  products   Product[]
+}
+
+
+model Section {
+  section_id   Int       @id @default(autoincrement())
+  section_name String
+  products     Product[]
+}
+
+
+model Size {
+  size_id      Int           @id @default(autoincrement())
+  size_type    String
+  size_amounts Size_Amount[]
+}
+
+
+model Size_Amount {
+  size_amount_id Int       @id @default(autoincrement())
+  size_id        Int
+  Size           Size      @relation(fields: [size_id], references: [size_id])
+  size_amount    Int
+  products       Product[]
+}
+
+
+
+model Product {
+  product_id     Int             @id @default(autoincrement())
+  value          Float
+  color_id       Int
+  Color          Color           @relation(fields: [color_id], references: [color_id])
+  brand_id       Int
+  Brand          Brand           @relation(fields: [brand_id], references: [brand_id])
+  description    String
+  section_id     Int
+  Section        Section         @relation(fields: [section_id], references: [section_id])
+  image_url      String
+  size_amount_id Int
+  Size_Amount    Size_Amount     @relation(fields: [size_amount_id], references: [size_amount_id])
+  Product_Order  Product_Order[]
+}
+
+
+model Order {
+  order_id           Int    @id @default(autoincrement())
+  address_direction  String
+  user_id            Int
+  User               User   @relation(fields: [user_id], references: [user_id])
+  purchased_products Int
+  order_total        Float
+}
+
+model Product_Order {
+  product_order_id Int     @id @default(autoincrement())
+  order_id         Int
+  Product          Product @relation(fields: [product_id], references: [product_id])
+  product_id       Int
+  product_quantity Int
+  product_total    Float
+}
