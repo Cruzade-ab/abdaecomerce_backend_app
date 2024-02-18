@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Delete, Param } from "@nestjs/common";
 import { UserService } from "./User.Service";
 import { User } from "@prisma/client";
 
-@Controller('/api/submit-form')
+@Controller('https://backendapp-production-5383.up.railway.app/api/submit-form')
 export class UserController{
 
     constructor(private readonly userService: UserService){}
