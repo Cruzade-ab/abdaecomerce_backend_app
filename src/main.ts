@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-        origin: true,
+        origin: "https://abda-ecomerce-frontend-bigk-git-abimael-abimael-santas-projects.vercel.app",
         credentials: true,
         methods: ["POST", "GET", "DELETE", "PUT"],
         allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'Authorization'], 
