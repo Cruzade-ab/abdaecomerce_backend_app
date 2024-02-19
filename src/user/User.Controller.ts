@@ -10,6 +10,9 @@ export class UserController {
 
     @Post()
     async createUser(@Body() data: User) {
+        data['role_id'] = 1
+        console.log(data)
+
         return this.userService.createUser(data);
     }
 
