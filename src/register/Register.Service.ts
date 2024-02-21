@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { User, Role } from "@prisma/client"
+import { User} from  "@prisma/client"
 
 
 @Injectable()
-export class UserService{
+export class RegisterService{
 
     constructor(
         private prisma: PrismaService){}
