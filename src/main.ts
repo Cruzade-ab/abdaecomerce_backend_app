@@ -15,6 +15,9 @@ async function bootstrap() {
         exposedHeaders: ['Authorization']
   });
 
-  await app.listen(port, "0.0.0.0")
+
+  await app.listen(port, "0.0.0.0");
+  console.log("Server is running on port", port);
+  console.log("Hello, world!");
 }
 bootstrap();
