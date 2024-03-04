@@ -2,13 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 
-const port = 3000;
+const port = 4000;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   app.enableCors({
-        origin: ["https://abda-ecomerce-frontend-bigk-git-abimael-abimael-santas-projects.vercel.app" || "http://localhost:3001"],
+        origin: ["http://localhost:3000" , "https://abda-ecomerce-frontend-bigk-git-abimael-abimael-santas-projects.vercel.app"],
         credentials: true,
         methods: ["POST", "GET", "DELETE", "PUT"],
         allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'Authorization'], 
