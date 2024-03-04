@@ -10,6 +10,16 @@ export class UserService {
 
     constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService) {}
 
+
+    async getAllUsers(){
+        try {
+            const users = await this.prisma.user.findMany();
+            return users;
+        } catch (error) {
+            console.error("Error retrieving users:", error);
+            throw error;
+        }
+    }
     // createUser
     async createUser(data: User): Promise <User> {
 

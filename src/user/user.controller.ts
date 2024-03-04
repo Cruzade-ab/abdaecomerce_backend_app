@@ -32,4 +32,9 @@ export class UserController {
         return this.userService.logoutUser(response);
     }
 
+    @Get('AllUsers')
+    async getAllUsers(){
+        return this.userService.getAllUsers();
+    }
+
 }
