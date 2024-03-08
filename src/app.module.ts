@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt'; // Importa JwtModule
 import { RegisterController } from './register/register.controller';
 import { RegisterModule } from './register/register.module';
 import { RegisterService } from './register/register.service';
@@ -8,12 +9,19 @@ import { LoginService } from './login/login.service';
 import { LoginModule } from './login/login.module';
 import { UserOperationsController } from './user-operations/user-operations.controller';
 import { UserOperationsModule } from './user-operations/user-operations.module';
-
-
+import { UserOperationsService } from './user-operations/user-operations.service';
 
 @Module({
-  imports: [RegisterModule, LoginModule, UserOperationsModule],
+  imports: [
+    RegisterModule,
+    LoginModule,
+    UserOperationsModule,
+    JwtModule.register({
+      secret: 'your_secret_key', // Configura la clave secreta para JwtModule
+      signOptions: { expiresIn: '1h' }, // Opcional: Configura las opciones de firma JWT
+    }),
+  ],
   controllers: [RegisterController, LoginController, UserOperationsController],
-  providers: [RegisterService, PrismaService, LoginService]
+  providers: [RegisterService, PrismaService, LoginService, UserOperationsService]
 })
 export class AppModule {}

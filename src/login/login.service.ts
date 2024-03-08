@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bycrypt from 'bcrypt';
-import {Response, Request, response} from 'express';
+import {Response} from 'express';
 
 
 @Injectable()
