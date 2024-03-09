@@ -1,4 +1,4 @@
-import { Controller, Injectable, Post, Body} from '@nestjs/common';
+import { Injectable, Controller, Post, Body } from '@nestjs/common';
 import { RegisterService } from './register.service';
 import { User } from '@prisma/client';
 
