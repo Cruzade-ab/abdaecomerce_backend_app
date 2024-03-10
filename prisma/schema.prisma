@@ -11,13 +11,13 @@ datasource db {
 }
 
 model Role {
-  role_id   Int    @id @default(autoincrement())
+  role_id   Int    @id @unique @default(autoincrement())
   role_type String 
   User      User[]
 }
 
 model User {
-  user_id   Int     @id @default(autoincrement())
+  user_id   Int     @id @unique @default(autoincrement())
   name      String
   last_name String
   email     String  @unique
@@ -30,18 +30,32 @@ model User {
 
 
 model Color {
-  color_id   Int       @id @default(autoincrement())
+  color_id   Int       @id @unique @default(autoincrement())
   color_name String
   products   Product[]
 }
 
 
 model Brand {
-  brand_id   Int       @id @default(autoincrement())
+  brand_id   Int       @id @unique @default(autoincrement())
   brand_name String
-  products   Product[]
+  products   GeneralProduct[]
 }
 
+model GeneralProduct{
+  general_product_id Int @id @default(autoincrement())
+  brand_id       Int
+  Brand          Brand           @relation(fields: [brand_id], references: [brand_id])
+  general_product_name String 
+  products Product[]
+  wantedproducts WantedProduct[]
+}
+
+model WantedProduct{
+  general_product_id       Int @id 
+  GeneralProduct GeneralProduct @relation(fields: [general_product_id], references: [general_product_id])
+  most_wanted_product_count Int 
+}
 
 model Section {
   section_id   Int       @id @default(autoincrement())
@@ -51,14 +65,14 @@ model Section {
 
 
 model Size {
-  size_id      Int           @id @default(autoincrement())
+  size_id      Int           @id @unique @default(autoincrement())
   size_type    String
   size_amounts Size_Amount[]
 }
 
 
 model Size_Amount {
-  size_amount_id Int       @id @default(autoincrement())
+  size_amount_id Int       @id @unique @default(autoincrement())
   size_id        Int
   Size           Size      @relation(fields: [size_id], references: [size_id])
   size_amount    Int
@@ -68,12 +82,12 @@ model Size_Amount {
 
 
 model Product {
-  product_id     Int             @id @default(autoincrement())
+  product_id     Int             @id @unique @default(autoincrement())
   value          Float
   color_id       Int
   Color          Color           @relation(fields: [color_id], references: [color_id])
-  brand_id       Int
-  Brand          Brand           @relation(fields: [brand_id], references: [brand_id])
+  general_product_id       Int
+  GeneralProduct GeneralProduct @relation(fields: [general_product_id], references: [general_product_id])
   description    String
   section_id     Int
   Section        Section         @relation(fields: [section_id], references: [section_id])
@@ -85,7 +99,7 @@ model Product {
 
 
 model Order {
-  order_id           Int    @id @default(autoincrement())
+  order_id           Int    @id @unique @default(autoincrement())
   address_direction  String
   user_id            Int
   User               User   @relation(fields: [user_id], references: [user_id])
@@ -94,7 +108,7 @@ model Order {
 }
 
 model Product_Order {
-  product_order_id Int     @id @default(autoincrement())
+  product_order_id Int     @id @unique @default(autoincrement())
   order_id         Int
   Product          Product @relation(fields: [product_id], references: [product_id])
   product_id       Int
