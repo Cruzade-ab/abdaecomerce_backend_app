@@ -12,6 +12,7 @@ import { UserOperationsModule } from './user-operations/user-operations.module';
 import { UserOperationsService } from './user-operations/user-operations.service';
 import { ProductsController } from './products/products.controller';
 import { ProductsModule } from './products/products.module';
+import { ProductsService } from './products/products.service';
 
 @Module({
   imports: [
@@ -25,6 +26,6 @@ import { ProductsModule } from './products/products.module';
     ProductsModule,
   ],
   controllers: [RegisterController, LoginController, UserOperationsController, ProductsController],
-  providers: [RegisterService, PrismaService, LoginService, UserOperationsService]
+  providers: [RegisterService, PrismaService, LoginService, UserOperationsService, ProductsService]
 })
 export class AppModule {}

@@ -36,5 +36,10 @@ export class ProductDTO {
     size_amount: number;
   }
 
+  export class SizeDTO {
+    size_id: number;      
+    size_type: string;
+ }
+
 
   
