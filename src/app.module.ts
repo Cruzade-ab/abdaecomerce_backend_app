@@ -10,6 +10,8 @@ import { LoginModule } from './login/login.module';
 import { UserOperationsController } from './user-operations/user-operations.controller';
 import { UserOperationsModule } from './user-operations/user-operations.module';
 import { UserOperationsService } from './user-operations/user-operations.service';
+import { ProductsController } from './products/products.controller';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -20,8 +22,9 @@ import { UserOperationsService } from './user-operations/user-operations.service
       secret: 'your_secret_key', // Configura la clave secreta para JwtModule
       signOptions: { expiresIn: '1h' }, // Opcional: Configura las opciones de firma JWT
     }),
+    ProductsModule,
   ],
-  controllers: [RegisterController, LoginController, UserOperationsController],
+  controllers: [RegisterController, LoginController, UserOperationsController, ProductsController],
   providers: [RegisterService, PrismaService, LoginService, UserOperationsService]
 })
 export class AppModule {}
