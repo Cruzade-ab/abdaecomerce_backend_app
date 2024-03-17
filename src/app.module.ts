@@ -13,6 +13,12 @@ import { UserOperationsService } from './user-operations/user-operations.service
 import { ProductsController } from './products/products.controller';
 import { ProductsModule } from './products/products.module';
 import { ProductsService } from './products/products.service';
+import { CloudinaryService } from './cloudinary/cloudinary.service';
+import { ConfigModule } from '@nestjs/config';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { AdminOperationsService } from './admin-operations/admin-operations.service';
+import { AdminOperationsController } from './admin-operations/admin-operations.controller';
+
 
 @Module({
   imports: [
@@ -24,8 +30,10 @@ import { ProductsService } from './products/products.service';
       signOptions: { expiresIn: '1h' }, // Opcional: Configura las opciones de firma JWT
     }),
     ProductsModule,
+    CloudinaryModule,
+    ConfigModule.forRoot()
   ],
-  controllers: [RegisterController, LoginController, UserOperationsController, ProductsController],
-  providers: [RegisterService, PrismaService, LoginService, UserOperationsService, ProductsService]
+  controllers: [RegisterController, LoginController, UserOperationsController, ProductsController, AdminOperationsController],
+  providers: [RegisterService, PrismaService, LoginService, UserOperationsService, ProductsService, CloudinaryService, AdminOperationsService]
 })
 export class AppModule {}
