@@ -18,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminOperationsService } from './admin-operations/admin-operations.service';
 import { AdminOperationsController } from './admin-operations/admin-operations.controller';
+import { AdminOperationsController } from './image-uploader/admin-operations/admin-operations.controller';
 
 
 @Module({

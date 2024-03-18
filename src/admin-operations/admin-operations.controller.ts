@@ -1,16 +1,18 @@
-import { Controller, Post, Body} from '@nestjs/common';
+import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminOperationsService } from './admin-operations.service';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { GeneralProductDTO } from '../dto/products_dto/product_dto';
+import { GeneralProductDTO } from 'src/dto/products_dto/product_dto';
 
-@Controller('admin-operations')
+@Controller('products')
 export class AdminOperationsController {
-  constructor(private readonly adminOperationsService: AdminOperationsService, private readonly prismaService: PrismaService) {}
+    constructor(private readonly adminOperationsService: AdminOperationsService) {}
 
-    @Post('createProduct')
-    async createProduct( productData: ProductDTO): Promise<any>{
-      
+    @Post('create')
+    @UseInterceptors(FileInterceptor('image'))
+    async createProduct(
+        @Body() productData: GeneralProductDTO,
+        @UploadedFile() imageFile: Express.Multer.File
+    ) {
+        return this.adminOperationsService.createGeneralProduct(productData, imageFile);
     }
-      
 }
-  

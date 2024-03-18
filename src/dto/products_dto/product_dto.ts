@@ -17,7 +17,7 @@ export class ProductDTO {
   }
   
   export class BrandDTO {
-    brand_id: number;
+    brand_id?: number;
     brand_name: string;
   }
   
