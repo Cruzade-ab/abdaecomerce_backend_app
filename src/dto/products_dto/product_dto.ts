@@ -34,6 +34,7 @@ export class ProductDTO {
   export class SizeAmountDTO {
     size_amount_id: number;
     size_amount: number;
+    size_id?: SizeDTO
   }
 
   export class SizeDTO {
