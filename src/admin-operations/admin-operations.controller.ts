@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminOperationsService } from './admin-operations.service';
 import { GeneralProductDTO } from 'src/dto/products_dto/product_dto';
@@ -11,8 +11,8 @@ export class AdminOperationsController {
     @UseInterceptors(FileInterceptor('image'))
     async createProduct(
         @Body() productData: GeneralProductDTO,
-        @UploadedFile() imageFile: Express.Multer.File
+        @UploadedFiles() imageFiles: Express.Multer.File[]
     ) {
-        return this.adminOperationsService.createGeneralProduct(productData, imageFile);
+        return this.adminOperationsService.createGeneralProduct(productData, imageFiles);
     }
 }

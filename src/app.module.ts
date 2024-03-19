@@ -18,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminOperationsService } from './admin-operations/admin-operations.service';
 import { AdminOperationsController } from './admin-operations/admin-operations.controller';
+import { AdminOperationsModule } from './admin-operations/admin-operations.module';
 
 
 @Module({
@@ -31,7 +32,7 @@ import { AdminOperationsController } from './admin-operations/admin-operations.c
     }),
     ProductsModule,
     CloudinaryModule,
-    ConfigModule.forRoot()
+    ConfigModule.forRoot(),AdminOperationsModule
   ],
   controllers: [RegisterController, LoginController, UserOperationsController, ProductsController, AdminOperationsController],
   providers: [RegisterService, PrismaService, LoginService, UserOperationsService, ProductsService, CloudinaryService, AdminOperationsService]

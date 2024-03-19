@@ -6,7 +6,6 @@ import { v2 as cloudinary} from 'cloudinary';
 export class CloudinaryService {
     async uploadProductImage(filePath: string, brand: string, productName: string): Promise<string> {
         const targetPath = `brandNames/${brand}/${productName}`;
-        const fullPath = `${targetPath}/${filePath}`;
 
         try {
             const result = await cloudinary.uploader.upload(filePath, {
