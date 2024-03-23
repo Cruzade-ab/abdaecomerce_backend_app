@@ -1,6 +1,7 @@
 # compiled output
 /dist
 /node_modules
+# .env < normalmente se pone aquí para ocultar el archivo env con la información de mi clodinary
 
 # Logs
 logs

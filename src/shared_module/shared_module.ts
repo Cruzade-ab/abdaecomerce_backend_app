@@ -9,6 +9,7 @@ import { RegisterController } from 'src/register/register.controller';
 import { RegisterService } from 'src/register/register.service';
 import { ProductsController } from 'src/products/products.controller';
 import { ProductsService } from 'src/products/products.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   controllers: [UserOperationsController, RegisterController, LoginController, ProductsController],
