@@ -2,10 +2,6 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProductRecived } from './adminProductInterface/product.interface';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { GeneralProductDTO } from 'src/dto/products_dto/product_dto';
-import { GeneralProduct, Product, Color, Size, Size_Amount } from '@prisma/client';
-
-
 @Injectable()
 export class AdminOperationsService {
     constructor(
@@ -13,20 +9,24 @@ export class AdminOperationsService {
         private readonly cloudinary: CloudinaryService
     ) { }
 
-    async createProduct(data: ProductRecived): Promise<ProductRecived> {
-        const { brand_name, general_product_name, products } = data;
+    async createProduct(data: ProductRecived, files:  Express.Multer.File[]): Promise<ProductRecived> {
+      console.log('Entering createProduct method')
+      console.log(data)
+
+      const { brand_name, general_product_name, products } = data;
+
 
         try {
             // Check if the brand already exists.
             let existingBrandName = await this.prisma.brand.findFirst({
-              where: {brand_name}
-            })
+              where: { brand_name }
+            });
+
             if (!existingBrandName) {
                 existingBrandName = await this.prisma.brand.create({
-                  data: {brand_name: brand_name}
-                })
+                  data: { brand_name: brand_name }
+                });
             }
-
 
             // Check if the General Product already exists
             let existingGeneralProduct = await this.prisma.generalProduct.findFirst({
@@ -36,14 +36,17 @@ export class AdminOperationsService {
             if (!existingGeneralProduct) {
                 // Create the General Product if it doesn't exist
                 existingGeneralProduct = await this.prisma.generalProduct.create({
-                    data: { general_product_name: general_product_name, brand_id: existingBrandName.brand_id},
+                    data: { general_product_name: general_product_name, brand_id: existingBrandName.brand_id },
                 });
             }
 
             // Process each product in the array
-            for (const productData of products) {
-                const { color, size, size_amount, value, description, section, imageFile } = productData;
-               
+            for (let i = 0; i < products.length; i++) {
+              const productData = products[i];
+              const { color, size, size_amount, value, description, section } = productData;
+              const imageFile = files[i];
+
+
                 // Check if Color exists, create if not
                 let colorEntity = await this.prisma.color.findFirst({ where: { color_name: color } });
                 if (!colorEntity) {
@@ -55,42 +58,41 @@ export class AdminOperationsService {
                 if (!sizeEntity) {
                     sizeEntity = await this.prisma.size.create({ data: { size_type: size } });
                 }
-                
-                
-                let sizeAmount = await this.prisma.size_Amount.create({ 
-                    data: { 
+
+                let sizeAmount = await this.prisma.size_Amount.create({
+                    data: {
                         size_amount: parseInt(size_amount), // Convert string to number
-                        Size: { connect: { size_id: sizeEntity.size_id} }
-                    } 
+                        Size: { connect: { size_id: sizeEntity.size_id } }
+                    }
                 });
 
-                let sectionEntity = await this.prisma.section.findFirst({where: {section_name: section}})
+                let sectionEntity = await this.prisma.section.findFirst({ where: { section_name: section } })
                 if (!sectionEntity) {
-                  sectionEntity = await this.prisma.section.create({ data: {section_name: section}})
+                    sectionEntity = await this.prisma.section.create({ data: { section_name: section } })
                 }
-                
 
                 // Upload product image to Cloudinary
                 if (imageFile) {
-                  const imageUrl = await this.cloudinary.uploadProductImage(imageFile);
-  
-                  // Create the Product
-                  await this.prisma.product.create({
-                      data: {
-                          value: parseFloat(value),
-                          color_id: colorEntity.color_id,
-                          description: description,
-                          section_id: sectionEntity.section_id,
-                          image_url: imageUrl,
-                          size_amount_id: sizeAmount.size_amount_id,
-                          general_product_id: existingGeneralProduct.general_product_id,
-                      },
-                  });
-              } else {
-                  // Handle case when imageFile is null (optional)
-                  // For example, you can log a message or skip creating the product
-                  console.log('Image file is null for product:', productData);
-              }
+                  const imageUrl = await this.cloudinary.uploadFile(imageFile);
+
+
+                    // Create the Product with the image URL
+                    await this.prisma.product.create({
+                        data: {
+                            value: parseFloat(value),
+                            color_id: colorEntity.color_id,
+                            description: description,
+                            section_id: sectionEntity.section_id,
+                            image_url: imageUrl, // Assuming image_url is a field in your database
+                            size_amount_id: sizeAmount.size_amount_id,
+                            general_product_id: existingGeneralProduct.general_product_id,
+                        },
+                    });
+                } else {
+                    // Handle case when imageFile is null (optional)
+                    // For example, you can log a message or skip creating the product
+                    console.log('Image file is null for product:', productData);
+                }
             }
 
             return data;

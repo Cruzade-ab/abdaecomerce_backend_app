@@ -1,13 +1,23 @@
 export interface ProductRecived {
-    brand_name: string;
     general_product_name: string;
+    brand_name: string;
     products: {
+        value: string;
         color: string;
         description: string;
-        imageFile: FileList;
         section: string;
         size: string;
         size_amount: string;
-        value: string;
+        imageFile?: Express.Multer.File; // Optional property for imageFile
     }[];
-}
+};
+
+export interface Product  {
+  value: string;
+  color: string;
+  description: string;
+  section: string;
+  imageFile: File | null;
+  size: string;
+  size_amount: string;
+};

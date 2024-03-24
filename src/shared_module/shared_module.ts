@@ -11,9 +11,10 @@ import { ProductsController } from 'src/products/products.controller';
 import { ProductsService } from 'src/products/products.service';
 import { ConfigModule } from '@nestjs/config';
 
+
 @Module({
   controllers: [UserOperationsController, RegisterController, LoginController, ProductsController],
-  providers: [UserOperationsService, RegisterService, LoginService, ProductsService],
+  providers: [UserOperationsService, RegisterService, LoginService, ProductsService, ],
   imports: [PrismaModule, JwtModule.register({secret: 'tuClaveSecreta', signOptions: {expiresIn: '1h'}})]
 })
 export class SharedModule {}

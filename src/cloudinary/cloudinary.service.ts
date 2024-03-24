@@ -1,44 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
-import stream from 'stream';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryResponse } from './cloudinary-response';
+import { streamifier } from 'streamifier'; // Import streamifier to create a readable stream from buffer
 
 @Injectable()
 export class CloudinaryService {
-    async uploadProductImage(imageFile: Buffer | NodeJS.ReadableStream): Promise<string> {
-        try {
-            // Upload the image file to Cloudinary
-            const cloudinaryResponse = await this.uploadFile(imageFile);
-
-            // Check if the response is an UploadApiResponse or an UploadApiErrorResponse
-            if ('secure_url' in cloudinaryResponse) {
-                // If it's an UploadApiResponse, return the secure URL of the uploaded image
-                return cloudinaryResponse.secure_url;
-            } else {
-                // If it's an UploadApiErrorResponse, throw an error with the error message
-                throw new Error(`Error uploading image: ${cloudinaryResponse.message}`);
-            }
-        } catch (error) {
-            // Handle errors appropriately
-            throw new Error(`Error uploading image: ${error.message}`);
-        }
-    }
-
-    private uploadFile(imageFile: Buffer | NodeJS.ReadableStream): Promise<UploadApiResponse | UploadApiErrorResponse> {
-        return new Promise<UploadApiResponse | UploadApiErrorResponse>((resolve, reject) => {
+    // method to upload a single file
+    async uploadFile(file: Express.Multer.File): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 (error, result) => {
                     if (error) return reject(error);
-                    resolve(result);
+                    resolve(result.secure_url);
                 },
             );
-            if (imageFile instanceof Buffer) {
-                uploadStream.write(imageFile);
-                uploadStream.end();
-            } else if (imageFile instanceof stream.Readable) {
-                imageFile.pipe(uploadStream);
-            } else {
-                reject(new Error('Invalid image file format'));
-            }
+            streamifier.createReadStream(file.buffer).pipe(uploadStream);
         });
     }
 }
