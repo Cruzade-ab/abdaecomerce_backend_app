@@ -1,23 +1,17 @@
-import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { AdminOperationsService } from './admin-operations.service';
-import { GeneralProductDTO } from 'src/dto/products_dto/product_dto';
+// src/form-data/form-data.service.ts
 
-@Controller('products')
-export class AdminOperationsController {
-    constructor(private readonly adminOperationsService: AdminOperationsService) {}
+import { Controller, Injectable, Post, Body } from '@nestjs/common';
+import { Product } from './adminProductInterface/product.interface';
 
-    @Post('create')
-    @UseInterceptors(FileInterceptor('image'))
-    async createProduct(
-        @Body() productData: GeneralProductDTO,
-        @UploadedFile() imageFile: Express.Multer.File
-    ) {
-        return this.adminOperationsService.createGeneralProduct(productData, imageFile);
-    }
+@Injectable()
+@Controller('api')
+export class FormDataService {
+    @Post('product/create')
+    async createProduct(@Body() product: Product): Promise<Product> {
+        // Logic to process the received product data
+        console.log('Received product:', product);
 
-    @Post('create')
-    async probarRuta() {
-        return "Hola Mundo";
+        console.log('Product creation complete');
+        return product;
     }
 }

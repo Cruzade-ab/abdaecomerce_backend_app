@@ -1,108 +1,83 @@
+// src/form-data/form-data.service.ts
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { GeneralProductDTO, ProductDTO } from 'src/dto/products_dto/product_dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { GeneralProductDTO } from '../dto/products_dto/product_dto';
 
 @Injectable()
-export class AdminOperationsService {
-    constructor(
-        private readonly prisma: PrismaService,
-        private readonly cloudinary: CloudinaryService
-    ) {}
+export class FormDataService {
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
-    async createGeneralProduct(data: GeneralProductDTO, imageFile: Express.Multer.File): Promise<GeneralProductDTO> {
-        try {
-            // Subir la imagen a Cloudinary
-            const imageUrl = await this.cloudinary.uploadProductImage(data.brand.brand_name, data.general_product_name, imageFile.path);
+  async saveFormData(formData: GeneralProductDTO): Promise<void> {
+    // Guardar los datos generales
+    const savedGeneralProduct = await this.prisma.generalProduct.create({
+      data: {
+        general_product_name: formData.general_product_name,
+        Brand: {
+          connectOrCreate: {
+            where: { brand_id: formData.brand.brand_id },
+            create: { brand_name: formData.brand.brand_name },
+          },
+        },
+      },
+      include: {
+        Brand: true,
+        products: true,
+      },
+    });
 
-            // Crear o encontrar la marca
-            let brand = await this.prisma.brand.findFirst({
-                where: { brand_name: data.brand.brand_name },
-            });
-            if (!brand) {
-                brand = await this.prisma.brand.create({
-                    data: { brand_name: data.brand.brand_name },
-                });
-            }
+    // Guardar los productos asociados
+    for (const productData of formData.products) {
+      // Guardar el color
+      const savedColor = await this.prisma.color.create({
+        data: {
+          color_id: productData.color.color_id,
+          color_name: productData.color.color_name,
+        },
+      });
 
-            // Crear el producto general
-            const generalProduct = await this.prisma.generalProduct.create({
-                data: {
-                    general_product_name: data.general_product_name,
-                    brand_id: brand.brand_id,
-                },
-                include: { Brand: true }, // Incluir la marca para evitar una consulta adicional
-            });
+      // Guardar la sección
+      const savedSection = await this.prisma.section.create({
+        data: {
+          section_id: productData.section.section_id,
+          section_name: productData.section.section_name,
+        },
+      });
 
-            // Crear y guardar cada producto individual
-            for (const product of data.products) {
-                // Crear o encontrar el color
-                let color = await this.prisma.color.findFirst({
-                    where: { color_name: product.color.color_name },
-                });
-                if (!color) {
-                    color = await this.prisma.color.create({
-                        data: { color_name: product.color.color_name },
-                    });
-                }
+      // Subir la imagen a Cloudinary y guardar la URL
+      const uploadedImage = await this.cloudinaryService.uploadProductImage(productData.image_url);
 
-                // Crear o encontrar la sección
-                let section = await this.prisma.section.findFirst({
-                    where: { section_name: product.section.section_name },
-                });
-                if (!section) {
-                    section = await this.prisma.section.create({
-                        data: { section_name: product.section.section_name },
-                    });
-                }
-
-                // Crear o encontrar la cantidad de tamaño
-                let size_amount = await this.prisma.size_Amount.create({
-                    data: {
-                        size_amount: product.size_amount.size_amount,
-                        Size: {
-                            connectOrCreate: {
-                                where: { size_id: product.size_amount.size_id.size_id }, // Accede a la propiedad size_id del objeto SizeDTO
-                                create: { 
-                                    size_id: product.size_amount.size_id.size_id, // Asigna size_id aquí
-                                    size_type: product.size_amount.size_amount.toString() // Convierte size_amount a cadena de texto
-                                }
-                            }
-                        }
-                    }
-                });
-                
-                
-
-                // Crear el producto
-                await this.prisma.product.create({
-                    data: {
-                        value: product.value,
-                        color_id: color.color_id,
-                        description: product.description,
-                        section_id: section.section_id,
-                        image_url: imageUrl,
-                        size_amount_id: size_amount.size_amount_id,
-                        general_product_id: generalProduct.general_product_id,
-                    },
-                });
-            }
-
-            // Devolver los datos completos del producto creado
-            return {
-                ...generalProduct,
-                brand: {
-                    brand_id: generalProduct.Brand.brand_id,
-                    brand_name: generalProduct.Brand.brand_name,
-                },
-                products: data.products.map((p, index) => ({
-                    ...p,
-                    image_url: imageUrl, // Utilizar la URL de la imagen subida
-                })),
-            }; 
-        } catch (error) {
-            // Manejar errores de manera adecuada
-            throw new Error(`Error al crear el producto: ${error.message}`);
-        }
+      // Create the Product
+      const savedProduct = await this.prisma.product.create({
+        data: {
+          value: productData.value,
+          description: productData.description,
+          Color: {
+            connect: {
+              color_id: savedColor.color_id,
+            },
+          },
+          Section: {
+            connect: {
+              section_id: savedSection.section_id,
+            },
+          },
+          image_url: uploadedImage, // Assuming 'image_url' is the correct field name
+          GeneralProduct: {
+            connect: {
+              general_product_id: savedGeneralProduct.general_product_id,
+            },
+          },
+        },
+        include: {
+          Section: true,
+          Color: true,
+        },
+      });
     }
+  }
 }

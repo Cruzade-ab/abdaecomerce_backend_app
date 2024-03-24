@@ -5,9 +5,7 @@ import { CloudinaryResponse } from './cloudinary-response';
 
 @Injectable()
 export class CloudinaryService {
-    async uploadProductImage(filePath: string, brand: string, productName: string): Promise<string> {
-        const targetPath = `brandNames/${brand}/${productName}/${filePath}`;
-
+    async uploadProductImage(filePath: string): Promise<string> {
         try {
             // Subir el archivo a Cloudinary
             const cloudinaryResponse = await this.uploadFile(filePath);
