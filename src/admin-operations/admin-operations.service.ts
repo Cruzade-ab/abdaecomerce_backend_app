@@ -9,9 +9,31 @@ export class AdminOperationsService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly cloudinary: CloudinaryService
-    ) {}
+    ) { }
+
+    async uploadProductImage(productId: number, imageFile: Express.Multer.File): Promise<string> {
+        if (!imageFile) {
+            throw new HttpException('No image file provided', HttpStatus.BAD_REQUEST);
+        }
+
+        // Upload the image file using CloudinaryService
+        const imageUrl = await this.cloudinary.uploadProductImage(imageFile.path);
+        
+        // Update the product with the new image URL
+        const updatedProduct = await this.prisma.product.update({
+            where: { product_id: productId },
+            data: { image_url: imageUrl },
+        });
+
+        if (!updatedProduct) {
+            throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+        }
+
+        return imageUrl;
+    }
 
     async createGeneralProduct(data: CreatedProduct, imageFiles: Express.Multer.File[]): Promise<GeneralProductDTO> {
+        console.log("Creando Brand")
         let brand = await this.prisma.brand.findFirst({
             where: { brand_name: data.brand.brand_name },
         });
@@ -21,7 +43,7 @@ export class AdminOperationsService {
                 data: { brand_name: data.brand.brand_name },
             });
         }
-
+        console.log("Creando General")
         const generalProduct = await this.prisma.generalProduct.create({
             data: {
                 general_product_name: data.general_product_name,
@@ -29,55 +51,67 @@ export class AdminOperationsService {
             },
         });
 
-        for (const [index, product] of data.products.entries()) {
-            const imageFile = imageFiles[index];
-            const imageUrl = imageFile
-                ? await this.cloudinary.uploadProductImage(imageFile.path, data.brand.brand_name, data.general_product_name)
-                : null;
+        console.log("Creando Product Details")
+        try {
+            for (const [index, product] of data.products.entries()) {
+                const imageFile = imageFiles.length > index ? imageFiles[index] : null;
+                const imageUrl = imageFile
+                    ? await this.cloudinary.uploadProductImage(imageFile.path)
+                    : null;
 
-            let color = await this.prisma.color.findFirst({
-                where: { color_name: product.color.color_name },
-            });
+                console.log(imageUrl)
+                let color = await this.prisma.color.findFirst({
+                    where: { color_name: product.color.color_name },
+                });
 
-            if (!color) {
-                color = await this.prisma.color.create({
-                    data: { color_name: product.color.color_name },
+                if (!color) {
+                    console.log("Revising Color")
+                    color = await this.prisma.color.create({
+                        data: { color_name: product.color.color_name },
+                    });
+                }
+
+                let section = await this.prisma.section.findFirst({
+                    where: { section_name: product.section.section_name },
+                });
+
+                if (!section) {
+                    console.log("Reviisng Section")
+                    section = await this.prisma.section.create({
+                        data: { section_name: product.section.section_name },
+                    });
+                }
+
+                let size = await this.prisma.size.findFirst({
+                    where: { size_type: product.size_amount.size_id.size_type },
+                });
+                console.log("Revising Size")
+
+                if (!size) {
+                    console.log("Revising Size");
+                    size = await this.prisma.size.create({
+                        data: { size_type: product.size_amount.size_id.size_type },
+                    });
+                }
+
+                await this.prisma.product.create({
+                    data: {
+                        value: product.value,
+                        color_id: color.color_id,
+                        description: product.description,
+                        section_id: section.section_id,
+                        image_url: imageUrl,
+                        size_amount_id: size.size_id,
+                        general_product_id: generalProduct.general_product_id,
+                    },
                 });
             }
 
-            let section = await this.prisma.section.findFirst({
-                where: { section_name: product.section.section_name },
-            });
-
-            if (!section) {
-                section = await this.prisma.section.create({
-                    data: { section_name: product.section.section_name },
-                });
-            }
-
-            let size = await this.prisma.size.findFirst({
-                where: { size_type: product.size_amount.size_id.size_type },
-            });
-
-            if (!size) {
-                size = await this.prisma.size.create({
-                    data: { size_type: product.size_amount.size_id.size_type },
-                });
-            }
-
-            await this.prisma.product.create({
-                data: {
-                    value: product.value,
-                    color_id: color.color_id,
-                    description: product.description,
-                    section_id: section.section_id,
-                    image_url: imageUrl,
-                    size_amount_id: size.size_id,
-                    general_product_id: generalProduct.general_product_id,
-                },
-            });
+        } catch (error) {
+            console.log(error)
         }
 
+        console.log("Sending product by id.")
         return this.sendProductsById(generalProduct.general_product_id);
     }
 
