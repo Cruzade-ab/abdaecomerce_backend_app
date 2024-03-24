@@ -1,38 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import * as streamifier from 'streamifier';
-import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryResponse } from './cloudinary-response';
+import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
+import stream from 'stream';
 
 @Injectable()
 export class CloudinaryService {
-    async uploadProductImage(filePath: string): Promise<string> {
+    async uploadProductImage(imageFile: Buffer | NodeJS.ReadableStream): Promise<string> {
         try {
-            // Subir el archivo a Cloudinary
-            const cloudinaryResponse = await this.uploadFile(filePath);
+            // Upload the image file to Cloudinary
+            const cloudinaryResponse = await this.uploadFile(imageFile);
 
-            // Comprueba si la respuesta es un UploadApiResponse o un UploadApiErrorResponse
+            // Check if the response is an UploadApiResponse or an UploadApiErrorResponse
             if ('secure_url' in cloudinaryResponse) {
-                // Si es un UploadApiResponse, devuelve la URL segura de la imagen subida
+                // If it's an UploadApiResponse, return the secure URL of the uploaded image
                 return cloudinaryResponse.secure_url;
             } else {
-                // Si es un UploadApiErrorResponse, lanza un error con el mensaje de error
-                throw new Error(`Error al subir la imagen: ${cloudinaryResponse.message}`);
+                // If it's an UploadApiErrorResponse, throw an error with the error message
+                throw new Error(`Error uploading image: ${cloudinaryResponse.message}`);
             }
         } catch (error) {
-            // Manejar errores de manera adecuada
-            throw new Error(`Error al subir la imagen: ${error.message}`);
+            // Handle errors appropriately
+            throw new Error(`Error uploading image: ${error.message}`);
         }
     }
 
-    private uploadFile(filePath: string): Promise<CloudinaryResponse> {
-        return new Promise<CloudinaryResponse>((resolve, reject) => {
+    private uploadFile(imageFile: Buffer | NodeJS.ReadableStream): Promise<UploadApiResponse | UploadApiErrorResponse> {
+        return new Promise<UploadApiResponse | UploadApiErrorResponse>((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 (error, result) => {
                     if (error) return reject(error);
                     resolve(result);
                 },
             );
-            streamifier.createReadStream(filePath).pipe(uploadStream);
+            if (imageFile instanceof Buffer) {
+                uploadStream.write(imageFile);
+                uploadStream.end();
+            } else if (imageFile instanceof stream.Readable) {
+                imageFile.pipe(uploadStream);
+            } else {
+                reject(new Error('Invalid image file format'));
+            }
         });
     }
 }

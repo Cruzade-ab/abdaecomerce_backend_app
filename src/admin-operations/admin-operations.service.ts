@@ -1,83 +1,101 @@
-// src/form-data/form-data.service.ts
-
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { GeneralProductDTO, ProductDTO } from 'src/dto/products_dto/product_dto';
+import { ProductRecived } from './adminProductInterface/product.interface';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { GeneralProductDTO } from 'src/dto/products_dto/product_dto';
+import { GeneralProduct, Product, Color, Size, Size_Amount } from '@prisma/client';
+
 
 @Injectable()
-export class FormDataService {
-  constructor(
-    private prisma: PrismaService,
-    private cloudinaryService: CloudinaryService,
-  ) {}
+export class AdminOperationsService {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly cloudinary: CloudinaryService
+    ) { }
 
-  async saveFormData(formData: GeneralProductDTO): Promise<void> {
-    // Guardar los datos generales
-    const savedGeneralProduct = await this.prisma.generalProduct.create({
-      data: {
-        general_product_name: formData.general_product_name,
-        Brand: {
-          connectOrCreate: {
-            where: { brand_id: formData.brand.brand_id },
-            create: { brand_name: formData.brand.brand_name },
-          },
-        },
-      },
-      include: {
-        Brand: true,
-        products: true,
-      },
-    });
+    async createProduct(data: ProductRecived): Promise<ProductRecived> {
+        const { brand_name, general_product_name, products } = data;
 
-    // Guardar los productos asociados
-    for (const productData of formData.products) {
-      // Guardar el color
-      const savedColor = await this.prisma.color.create({
-        data: {
-          color_id: productData.color.color_id,
-          color_name: productData.color.color_name,
-        },
-      });
+        try {
+            // Check if the brand already exists.
+            let existingBrandName = await this.prisma.brand.findFirst({
+              where: {brand_name}
+            })
+            if (!existingBrandName) {
+                existingBrandName = await this.prisma.brand.create({
+                  data: {brand_name: brand_name}
+                })
+            }
 
-      // Guardar la sección
-      const savedSection = await this.prisma.section.create({
-        data: {
-          section_id: productData.section.section_id,
-          section_name: productData.section.section_name,
-        },
-      });
 
-      // Subir la imagen a Cloudinary y guardar la URL
-      const uploadedImage = await this.cloudinaryService.uploadProductImage(productData.image_url);
+            // Check if the General Product already exists
+            let existingGeneralProduct = await this.prisma.generalProduct.findFirst({
+                where: { general_product_name },
+            });
 
-      // Create the Product
-      const savedProduct = await this.prisma.product.create({
-        data: {
-          value: productData.value,
-          description: productData.description,
-          Color: {
-            connect: {
-              color_id: savedColor.color_id,
-            },
-          },
-          Section: {
-            connect: {
-              section_id: savedSection.section_id,
-            },
-          },
-          image_url: uploadedImage, // Assuming 'image_url' is the correct field name
-          GeneralProduct: {
-            connect: {
-              general_product_id: savedGeneralProduct.general_product_id,
-            },
-          },
-        },
-        include: {
-          Section: true,
-          Color: true,
-        },
-      });
+            if (!existingGeneralProduct) {
+                // Create the General Product if it doesn't exist
+                existingGeneralProduct = await this.prisma.generalProduct.create({
+                    data: { general_product_name: general_product_name, brand_id: existingBrandName.brand_id},
+                });
+            }
+
+            // Process each product in the array
+            for (const productData of products) {
+                const { color, size, size_amount, value, description, section, imageFile } = productData;
+               
+                // Check if Color exists, create if not
+                let colorEntity = await this.prisma.color.findFirst({ where: { color_name: color } });
+                if (!colorEntity) {
+                    colorEntity = await this.prisma.color.create({ data: { color_name: color } });
+                }
+
+                // Check if Size exists, create if not
+                let sizeEntity = await this.prisma.size.findFirst({ where: { size_type: size } });
+                if (!sizeEntity) {
+                    sizeEntity = await this.prisma.size.create({ data: { size_type: size } });
+                }
+                
+                
+                let sizeAmount = await this.prisma.size_Amount.create({ 
+                    data: { 
+                        size_amount: parseInt(size_amount), // Convert string to number
+                        Size: { connect: { size_id: sizeEntity.size_id} }
+                    } 
+                });
+
+                let sectionEntity = await this.prisma.section.findFirst({where: {section_name: section}})
+                if (!sectionEntity) {
+                  sectionEntity = await this.prisma.section.create({ data: {section_name: section}})
+                }
+                
+
+                // Upload product image to Cloudinary
+                if (imageFile) {
+                  const imageUrl = await this.cloudinary.uploadProductImage(imageFile);
+  
+                  // Create the Product
+                  await this.prisma.product.create({
+                      data: {
+                          value: parseFloat(value),
+                          color_id: colorEntity.color_id,
+                          description: description,
+                          section_id: sectionEntity.section_id,
+                          image_url: imageUrl,
+                          size_amount_id: sizeAmount.size_amount_id,
+                          general_product_id: existingGeneralProduct.general_product_id,
+                      },
+                  });
+              } else {
+                  // Handle case when imageFile is null (optional)
+                  // For example, you can log a message or skip creating the product
+                  console.log('Image file is null for product:', productData);
+              }
+            }
+
+            return data;
+        } catch (error) {
+            throw new HttpException('Error creating product', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-  }
 }

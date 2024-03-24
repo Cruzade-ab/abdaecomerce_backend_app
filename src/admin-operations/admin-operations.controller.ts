@@ -1,17 +1,17 @@
-// src/form-data/form-data.service.ts
-
 import { Controller, Injectable, Post, Body } from '@nestjs/common';
-import { Product } from './adminProductInterface/product.interface';
-
+import { ProductRecived } from './adminProductInterface/product.interface';
+import { AdminOperationsService } from './admin-operations.service';
 @Injectable()
 @Controller('api')
-export class FormDataService {
-    @Post('product/create')
-    async createProduct(@Body() product: Product): Promise<Product> {
-        // Logic to process the received product data
-        console.log('Received product:', product);
+export class AdminOperationsController {
+    constructor(
+        private readonly adminOpertionService :AdminOperationsService
+    ) { }
 
+    @Post('product/create')
+    async createProduct(@Body() product: ProductRecived): Promise<ProductRecived> {
+        console.log('Received product:', product);
         console.log('Product creation complete');
-        return product;
+        return this.adminOpertionService.createProduct(product)
     }
 }

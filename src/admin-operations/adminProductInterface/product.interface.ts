@@ -1,4 +1,4 @@
-export interface Product {
+export interface ProductRecived {
     brand_name: string;
     general_product_name: string;
     products: {
