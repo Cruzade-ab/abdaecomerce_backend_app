@@ -15,4 +15,9 @@ export class AdminOperationsController {
     ) {
         return this.adminOperationsService.createGeneralProduct(productData, imageFile);
     }
+
+    @Post('create')
+    async probarRuta() {
+        return "Hola Mundo";
+    }
 }
