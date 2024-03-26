@@ -14,19 +14,10 @@ export class AdminOperationsController {
     ) { }
 
     @Post('product/create')
-    @UseInterceptors(FilesInterceptor('products', 10, {
-        storage: diskStorage({
-            destination: './uploads',
-            filename: (req, file, cb) => {
-                const uniqueSuffix = uuidv4();
-                cb(null, `${uniqueSuffix}-${file.originalname}`);
-            },
-        }),
-    }))
+    @UseInterceptors(FilesInterceptor('files'))
     async createProduct(
         @Body() product: ProductRecived,
-        @UploadedFiles() files: Express.Multer.File[], // Use Express.Multer.File[] type
-    ): Promise<ProductRecived> {
+        @UploadedFiles() files: Express.Multer.File[],): Promise<ProductRecived> {
         console.log('Received product:', product);
         console.log('Received files:', files);
         console.log('Entering createProduct method');
