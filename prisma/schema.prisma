@@ -31,20 +31,35 @@ model Color {
 }
 
 model Brand {
-  brand_id       Int              @id @unique @default(autoincrement())
-  brand_name     String
-  GeneralProduct GeneralProduct[]
+  brand_id   Int              @id @unique @default(autoincrement())
+  brand_name String
+  products   GeneralProduct[]
+}
+
+model GeneralProduct {
+  general_product_id   Int            @id @default(autoincrement())
+  brand_id             Int
+  general_product_name String
+  Brand                Brand          @relation(fields: [brand_id], references: [brand_id])
+  products             Product[]
+  wantedproducts       WantedProduct?
+}
+
+model WantedProduct {
+  general_product_id        Int            @id
+  most_wanted_product_count Int
+  GeneralProduct            GeneralProduct @relation(fields: [general_product_id], references: [general_product_id])
 }
 
 model Section {
   section_id   Int       @id @default(autoincrement())
-  section_name String    @unique
+  section_name String     @unique
   products     Product[]
 }
 
 model Size {
   size_id      Int           @id @unique @default(autoincrement())
-  size_type    String        @unique
+  size_type    String         @unique
   size_amounts Size_Amount[]
 }
 
@@ -88,19 +103,4 @@ model Product_Order {
   product_quantity Int
   product_total    Float
   Product          Product @relation(fields: [product_id], references: [product_id])
-}
-
-model GeneralProduct {
-  general_product_id   Int            @id @default(autoincrement())
-  brand_id             Int
-  general_product_name String
-  Brand                Brand          @relation(fields: [brand_id], references: [brand_id])
-  Product              Product[]
-  WantedProduct        WantedProduct?
-}
-
-model WantedProduct {
-  general_product_id        Int            @id
-  most_wanted_product_count Int
-  GeneralProduct            GeneralProduct @relation(fields: [general_product_id], references: [general_product_id])
 }
