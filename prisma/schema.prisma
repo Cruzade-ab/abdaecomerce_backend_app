@@ -25,9 +25,11 @@ model User {
 }
 
 model Color {
-  color_id   Int       @id @unique @default(autoincrement())
-  color_name String    @unique
-  products   Product[]
+  color_id        Int       @id @unique @default(autoincrement())
+  color_name      String    @unique
+  image_url       String?   // Primary image URL for the color
+  hover_image_url String?   // Hover image URL specific to the color
+  products        Product[]
 }
 
 model Brand {
@@ -39,8 +41,11 @@ model Brand {
 model GeneralProduct {
   general_product_id   Int            @id @default(autoincrement())
   brand_id             Int
+  section_id           Int
   general_product_name String
+  description          String
   Brand                Brand          @relation(fields: [brand_id], references: [brand_id])
+  Section            Section         @relation(fields: [section_id], references: [section_id])
   products             Product[]
   wantedproducts       WantedProduct?
 }
@@ -54,7 +59,7 @@ model WantedProduct {
 model Section {
   section_id   Int       @id @default(autoincrement())
   section_name String     @unique
-  products     Product[]
+  GeneralProduct GeneralProduct[]
 }
 
 model Size {
@@ -75,14 +80,10 @@ model Product {
   product_id         Int             @id @unique @default(autoincrement())
   value              Float
   color_id           Int
-  description        String
-  section_id         Int
-  image_url          String
   size_amount_id     Int
   general_product_id Int
   Color              Color           @relation(fields: [color_id], references: [color_id])
   GeneralProduct     GeneralProduct  @relation(fields: [general_product_id], references: [general_product_id])
-  Section            Section         @relation(fields: [section_id], references: [section_id])
   Size_Amount        Size_Amount     @relation(fields: [size_amount_id], references: [size_amount_id])
   Product_Order      Product_Order[]
 }

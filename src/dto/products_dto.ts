@@ -2,10 +2,8 @@
   export class ProductDTO {
     product_id: number;
     value: number;
-    color: ColorDTO;
-    description: string;
-    section: SectionDTO;
-    image_url: string;
+    color: ColorDTO; // ColorDTO now includes image_url and hover_image_url
+   
     size_amount: SizeAmountDTO;
   }
   
@@ -13,6 +11,8 @@
     general_product_id: number;
     brand: BrandDTO;
     general_product_name: string;
+    description: string;
+    section: SectionDTO;
     products: ProductDTO[];
   }
   
@@ -24,6 +24,8 @@
   export class ColorDTO {
     color_id: number;
     color_name: string;
+    image_url: string; // Optional if the image URL can be null
+    hover_image_url: string; // Optional if the hover image URL can be null
   }
   
   export class SectionDTO {
