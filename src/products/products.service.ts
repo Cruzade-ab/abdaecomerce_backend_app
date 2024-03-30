@@ -40,11 +40,11 @@ export class ProductsService {
             products: gp.products.map((p) => ({
                 product_id: p.product_id,
                 value: p.value,
+                image_url: p.image_url,
+                hover_image_url: p.hover_image_url ,
                 color: {
                     color_id: p.Color.color_id, 
                     color_name: p.Color.color_name, 
-                    image_url: p.Color.image_url,
-                    hover_image_url: p.Color.hover_image_url
                 },
                 size_amount: {
                     size_amount_id: p.Size_Amount.size_amount_id,
@@ -52,7 +52,8 @@ export class ProductsService {
                 },
                 size: {
                     size_id: p.Size_Amount.Size.size_id, 
-                    size_name: p.Size_Amount.Size.size_type }
+                    size_name: p.Size_Amount.Size.size_type },
+
             }))
         }));
     }

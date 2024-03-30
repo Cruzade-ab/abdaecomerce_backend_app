@@ -2,6 +2,8 @@
   export class ProductDTO {
     product_id: number;
     value: number;
+    image_url: string;
+    hover_image_url: string; 
     color: ColorDTO; 
     size_amount: SizeAmountDTO;
   }
@@ -23,8 +25,7 @@
   export class ColorDTO {
     color_id: number;
     color_name: string;
-    image_url: string;
-    hover_image_url: string; 
+
   }
   
   export class SectionDTO {

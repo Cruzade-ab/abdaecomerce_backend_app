@@ -7,8 +7,8 @@ export interface ProductReceived {
   products: {
       value: string;
       color_name: string;  
-      image_url?: File | null;  // Assuming the image URL is sent as a string
-      hover_image_url?: File | null; 
+      image_url?: File  | null; 
+      hover_image_url?: File | null ; 
       sizes: SizesObject;
     }[];
   }
