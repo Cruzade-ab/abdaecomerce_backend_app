@@ -23,7 +23,7 @@ export class UserService {
     // createUser
     async createUser(data: User): Promise <User> {
 
-        data['role_id'] = 1;
+    
         const hashed_password = await bycrypt.hash(data.password, 12);
         data.password = hashed_password;
 

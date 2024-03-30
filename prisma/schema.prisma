@@ -27,8 +27,6 @@ model User {
 model Color {
   color_id        Int       @id @unique @default(autoincrement())
   color_name      String    @unique
-  image_url       String?   // Primary image URL for the color
-  hover_image_url String?   // Hover image URL specific to the color
   products        Product[]
 }
 
@@ -82,6 +80,8 @@ model Product {
   color_id           Int
   size_amount_id     Int
   general_product_id Int
+  image_url          String?  // Add image URL field for the product
+  hover_image_url    String?  // Add hover image URL field for the product
   Color              Color           @relation(fields: [color_id], references: [color_id])
   GeneralProduct     GeneralProduct  @relation(fields: [general_product_id], references: [general_product_id])
   Size_Amount        Size_Amount     @relation(fields: [size_amount_id], references: [size_amount_id])
