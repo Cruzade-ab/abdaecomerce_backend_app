@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, UploadedFile } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { ProductRecived } from "src/dto/product_recived";
+import { ProductReceived } from "src/dto/product_recived";
 import { CloudinaryService } from "src/cloudinary/cloudinary.service";
 @Injectable()
 export class AdminService {
@@ -10,11 +10,11 @@ export class AdminService {
         private readonly cloudinary: CloudinaryService
     ) { }
 
-    async createProduct(data: ProductRecived, files: Express.Multer.File[]): Promise<ProductRecived> {
+    async createProduct(data: ProductReceived, files: Express.Multer.File[]): Promise<ProductReceived> {
         console.log('Entering createProduct method')
         console.log(data)
 
-        const { brand_name, general_product_name, products } = data;
+        const { brand_name, general_product_name, products, description, section, } = data;
 
 
         try {
@@ -34,24 +34,50 @@ export class AdminService {
                 where: { general_product_name },
             });
 
+            let sectionEntity = await this.prisma.section.findFirst({ where: { section_name: section } })
+            if (!sectionEntity) {
+                sectionEntity = await this.prisma.section.create({ data: { section_name: section } })
+            }
+
             if (!existingGeneralProduct) {
                 // Create the General Product if it doesn't exist
                 existingGeneralProduct = await this.prisma.generalProduct.create({
-                    data: { general_product_name: general_product_name, brand_id: existingBrandName.brand_id },
+                    data: {
+                        general_product_name: general_product_name,
+                        brand_id: existingBrandName.brand_id,
+                        description: description,
+                        section_id: sectionEntity.section_id, // Add description heresection, 
+                    },
                 });
             }
 
-            // Process each product in the array
+
             for (let i = 0; i < products.length; i++) {
                 const productData = products[i];
-                const { color, size, size_amount, value, description, section } = productData;
-                const imageFile = files[i];
+                const { color, size, size_amount, value } = productData;
+                const recived_image = color.image_url[i]
+                const recived_hover_image = color.image_url[i]
 
 
-                // Check if Color exists, create if not
-                let colorEntity = await this.prisma.color.findFirst({ where: { color_name: color } });
+
+                const image_url = await this.cloudinary.uploadAndGetUrl(recived_image);
+
+
+                const image_hover_url = await this.cloudinary.uploadAndGetUrl(recived_hover_image);
+
+
+
+
+                // Check if Color exists, create if not, including handling image uploads
+                let colorEntity = await this.prisma.color.findFirst({ where: { color_name: color.color_name } });
                 if (!colorEntity) {
-                    colorEntity = await this.prisma.color.create({ data: { color_name: color } });
+                    colorEntity = await this.prisma.color.create({
+                        data: {
+                            color_name: color.color_name,
+                            image_url: image_url ,
+                            hover_image_url: image_hover_url,
+                        }
+                    });
                 }
 
                 // Check if Size exists, create if not
@@ -60,48 +86,29 @@ export class AdminService {
                     sizeEntity = await this.prisma.size.create({ data: { size_type: size } });
                 }
 
-                let sizeAmount = await this.prisma.size_Amount.create({
+                let sizeAmountEntity = await this.prisma.size_Amount.create({
                     data: {
-                        size_amount: parseInt(size_amount), // Convert string to number
-                        Size: { connect: { size_id: sizeEntity.size_id } }
+                        size_amount: parseInt(size_amount),
+                        size_id: sizeEntity.size_id
                     }
                 });
 
-                let sectionEntity = await this.prisma.section.findFirst({ where: { section_name: section } })
-                if (!sectionEntity) {
-                    sectionEntity = await this.prisma.section.create({ data: { section_name: section } })
-                }
-
-                // Upload product image to Cloudinary
-                if (imageFile) {
-                    const uploadResult = await this.cloudinary.uploadAndGetUrl(imageFile);
-
-                    // Assuming uploadResult contains the secure URL directly
-                    const imageUrl = uploadResult;
-
-
-                    // Create the Product with the image URL
-                    await this.prisma.product.create({
-                        data: {
-                            value: parseFloat(value),
-                            color_id: colorEntity.color_id,
-                            description: description,
-                            section_id: sectionEntity.section_id,
-                            image_url: imageUrl, // Assuming image_url is a field in your database
-                            size_amount_id: sizeAmount.size_amount_id,
-                            general_product_id: existingGeneralProduct.general_product_id,
-                        },
-                    });
-                } else {
-                    console.log('Image file is null for product:', productData);
-                }
+                // Create the Product
+                await this.prisma.product.create({
+                    data: {
+                        value: parseFloat(value),
+                        color_id: colorEntity.color_id,
+                        size_amount_id: sizeAmountEntity.size_amount_id,
+                        general_product_id: existingGeneralProduct.general_product_id,
+                    },
+                });
             }
-
-            return data;
+            return data
         } catch (error) {
             throw new HttpException('Error creating product', HttpStatus.INTERNAL_SERVER_ERROR);
+            // Handle the error appropriately
         }
+
     }
 }
-
 

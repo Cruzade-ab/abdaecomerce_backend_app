@@ -1,21 +1,21 @@
 export class ColorDTO {
   color_name: string;
-  image_url?: string;  // Optional: URL for the main image of the color
-  hover_image_url?: string;  // Optional: URL for the hover image of the color
+  image_url: string;  
+  hover_image_url: string;  
 }
 
 export class ProductDTO {
   value: number;
   color: ColorDTO;  // ColorDTO now includes image URLs
-  description: string;
-  section: SectionDTO;
   size_amount: SizeAmountDTO;
-  // Removed image_url if images are only linked to colors
+  
 }
 
 export class CreatedProduct {
   brand: BrandDTO;
   general_product_name: string;
+  description: string;
+  section: SectionDTO;
   products: ProductDTO[];
 }
 
@@ -29,7 +29,7 @@ export class SectionDTO {
 
 export class SizeAmountDTO {
   size_amount: number;
-  size: SizeDTO;  // Assuming you want to include the size details directly
+  size: SizeDTO;  
 }
 
 export class SizeDTO { 

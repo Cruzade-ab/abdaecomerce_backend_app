@@ -1,7 +1,7 @@
 import { Injectable, Controller, Post, UseInterceptors, Body, UploadedFiles, } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AnyFilesInterceptor } from "@nestjs/platform-express";
-import { ProductRecived } from "src/dto/product_recived";
+import { ProductReceived } from "src/dto/product_recived";
 import { AdminService } from "./admin.service";
 
 @Controller('api/admin')
@@ -15,9 +15,9 @@ export class AdminController {
     @Post('/product/create')
     @UseInterceptors(AnyFilesInterceptor())
     async createProduct(
-        @Body() product: ProductRecived,
+        @Body() product: ProductReceived,
         @UploadedFiles() files: Express.Multer.File[],
-    ): Promise<ProductRecived> {
+    ): Promise<ProductReceived> {
         console.log('Received product:', product);
         console.log('Received files:', files);
         console.log('Entering createProduct method');
