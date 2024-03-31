@@ -7,7 +7,7 @@ import { GeneralProductDTO } from 'src/dto/products_dto';
 export class ProductsService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async sendProducts(): Promise<GeneralProductDTO[]> {
+    async getWantedProducts(): Promise<GeneralProductDTO[]> {
         const products = await this.prisma.generalProduct.findMany({
             include: {
                 Brand: true,
@@ -57,7 +57,7 @@ export class ProductsService {
             }))
         }));
     }
-    async menProducts(): Promise<GeneralProductDTO[]> {
+    async getMenProducts(): Promise<GeneralProductDTO[]> {
         const products = await this.prisma.generalProduct.findMany({
             where: {section_id: 1 },
             include: {
@@ -108,7 +108,7 @@ export class ProductsService {
             }))
         }));
     }
-    async womenProducts(): Promise<GeneralProductDTO[]> {
+    async getWomenProducts(): Promise<GeneralProductDTO[]> {
         const products = await this.prisma.generalProduct.findMany({
             where: {section_id: 2 },
             include: {
