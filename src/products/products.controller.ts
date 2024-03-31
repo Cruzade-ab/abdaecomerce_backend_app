@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post , Param} from '@nestjs/common';
 import { GeneralProductDTO } from 'src/dto/products_dto';
 import { ProductsService } from './products.service';
 import { WantedProductDTO } from 'src/dto/wanted_product';
@@ -23,9 +23,10 @@ export class ProductsController {
         return this.productsService.getWomenProducts()
     }
 
-    @Get('/product')
-    async getProductById(): Promise<GeneralProductDTO> {
-        return 
+    @Post('/getProductById')
+    async getProductById(@Body() id: { productId: number }): Promise<GeneralProductDTO[] | null> {
+        console.log("Entering getProductById", id.productId);
+        return this.productsService.getProductById(id.productId);
     }
 
     @Post('/wantedProduct')

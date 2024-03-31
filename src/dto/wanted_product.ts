@@ -3,6 +3,7 @@ export class WantedProductDTO {
     value: number;
     image_url: string;
     hover_image_url: string; 
+    general_product_id: number;
     color: ColorDTO; 
     size_amount: SizeAmountDTO;
   }
