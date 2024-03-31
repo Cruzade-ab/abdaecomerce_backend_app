@@ -9,30 +9,30 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   // crear usuario
-  @Post('register')
+  @Post('/register')
   async createUser(@Body() data: User) {
 	return this.userService.createUser(data);
   }
 
   // logear usuario
-  @Post('login')
+  @Post('/login')
     async logUser(@Body() data: User, @Res({passthrough: true}) res: Response) {
         return this.userService.logUser(data, res);
     }
 
 	// Obtener usuario del token
-	@Get('getUser')
+	@Get('/getUser')
     async getUser(@Req() request: Request) {
         return this.userService.getUserFromToken(request);
     }
 
     // Hacer logout del usuario.
-    @Post('logout')
+    @Post('/logout')
     async logoutUser(@Res({passthrough: true}) response: Response) {
         return this.userService.logoutUser(response);
     }
 
-    @Get('AllUsers')
+    @Get('/AllUsers')
     async getAllUsers(){
         return this.userService.getAllUsers();
     }
