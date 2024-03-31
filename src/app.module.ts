@@ -1,9 +1,16 @@
 import { Module } from '@nestjs/common';
-import {RegisterModule} from './register/Register.Module'
+import { UserModule } from './user/user.module';
+import { ProductsModule } from './products/products.module';
+import { AdminModule } from './admin/admin.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { ConfigModule } from '@nestjs/config';
+
 
 @Module({
-  imports: [RegisterModule],
-  controllers: [],
-  providers: [],
+  imports: [ConfigModule.forRoot({
+    isGlobal: true, 
+  }),
+  UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule],
 })
 export class AppModule {}
