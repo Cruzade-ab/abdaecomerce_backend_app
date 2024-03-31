@@ -23,8 +23,14 @@ export class ProductsController {
         return this.productsService.getWomenProducts()
     }
 
-    @Post('wantedProduct')
+    @Get('/product')
+    async getProductById(): Promise<GeneralProductDTO> {
+        return 
+    }
+
+    @Post('/wantedProduct')
     async setWantedProductCount(@Body() data: WantedProductDTO ) {
+        console.log("Wanted product recived", WantedProductDTO)
         return 
     }
 }
