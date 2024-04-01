@@ -219,4 +219,17 @@ export class ProductsService {
             }))
         }));
     }
+
+    async setWantedProductCount( id: number ) {
+        console.log("Getting product by Id: " ,id)
+
+        const productVariantId = id
+
+        const productVriant = await this.prisma.product.findFirst({
+            where: {product_id: productVariantId}
+        }) 
+
+        return console.log("Product General: ", productVriant)
+
+    }
 }

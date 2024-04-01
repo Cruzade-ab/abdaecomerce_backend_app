@@ -30,8 +30,8 @@ export class ProductsController {
     }
 
     @Post('/wantedProduct')
-    async setWantedProductCount(@Body() data: WantedProductDTO ) {
+    async setWantedProductCount(@Body() id: { productId: number }) {
         console.log("Wanted product recived", WantedProductDTO)
-        return 
+        return this.productsService.setWantedProductCount(id.productId)
     }
 }
