@@ -58,6 +58,9 @@ export class ProductsService {
             }))
         }));
     }
+
+
+
     async getMenProducts(): Promise<GeneralProductDTO[]> {
         const products = await this.prisma.generalProduct.findMany({
             where: {section_id: 1 },
@@ -109,6 +112,9 @@ export class ProductsService {
             }))
         }));
     }
+
+
+
     async getWomenProducts(): Promise<GeneralProductDTO[]> {
         const products = await this.prisma.generalProduct.findMany({
             where: {section_id: 2 },
@@ -161,75 +167,93 @@ export class ProductsService {
         }));
     }
 
-    async getProductById( id: number ): Promise<GeneralProductDTO[]> {
-        console.log("Getting product by Id: " ,id)
-        const productVariantId = id
 
-        const productVriant = await this.prisma.product.findFirst({
-            where: {product_id: productVariantId}
-        }) 
 
+    async getProductById(id: number): Promise<GeneralProductDTO[]> {
+        console.log("Getting product by Id:", id);
+
+        const productId = parseInt(id.toString(), 10);
+    
+        const productVariant = await this.prisma.product.findFirst({
+            where: { product_id: productId }
+        });
+    
+        if (!productVariant) {
+            throw new Error(`Product with ID ${productId} not found`);
+        }
+
+    
         const products = await this.prisma.generalProduct.findMany({
-            where: {general_product_id: productVriant.general_product_id },
+            where: { general_product_id: productVariant.general_product_id },
             include: {
                 Brand: true,
-                Section: true, 
+                Section: true,
                 products: {
                     include: {
-                        Color: true, 
-                        Size_Amount: { 
+                        Color: true,
+                        Size_Amount: {
                             include: {
-                                Size: true 
+                                Size: true
                             }
                         },
                     }
                 },
             }
         });
-
-        return products.map((gp) => ({
+    
+         const GeneralProduct = products.map((gp) => ({
             general_product_id: gp.general_product_id,
             brand: {
                 brand_id: gp.Brand.brand_id,
-                brand_name: gp.Brand.brand_name 
+                brand_name: gp.Brand.brand_name
             },
-            section: { 
+            section: {
                 section_id: gp.Section.section_id,
                 section_name: gp.Section.section_name
             },
             general_product_name: gp.general_product_name,
-            description: gp.description, 
+            description: gp.description,
             products: gp.products.map((p) => ({
                 product_id: p.product_id,
                 value: p.value,
                 image_url: p.image_url,
-                hover_image_url: p.hover_image_url ,
+                hover_image_url: p.hover_image_url,
                 color: {
-                    color_id: p.Color.color_id, 
-                    color_name: p.Color.color_name, 
+                    color_id: p.Color.color_id,
+                    color_name: p.Color.color_name,
                 },
                 size_amount: {
                     size_amount_id: p.Size_Amount.size_amount_id,
-                    size_amount: p.Size_Amount.size_amount 
+                    size_amount: p.Size_Amount.size_amount
                 },
                 size: {
-                    size_id: p.Size_Amount.Size.size_id, 
-                    size_name: p.Size_Amount.Size.size_type },
-
+                    size_id: p.Size_Amount.Size.size_id,
+                    size_name: p.Size_Amount.Size.size_type
+                },
             }))
         }));
+        console.log(GeneralProduct)
+        
+        return GeneralProduct
     }
+    
+    async setWantedProductCount(id: number) {
+        console.log("Setting wanted count for product by Id:", id);
 
-    async setWantedProductCount( id: number ) {
-        console.log("Getting product by Id: " ,id)
-
-        const productVariantId = id
-
-        const productVriant = await this.prisma.product.findFirst({
-            where: {product_id: productVariantId}
-        }) 
-
-        return console.log("Product General: ", productVriant)
-
+        const productId = parseInt(id.toString(), 10);
+    
+        const productVariant = await this.prisma.product.findFirst({
+            where: { product_id: productId }
+        });
+    
+        if (!productVariant) {
+            throw new Error(`Product with ID ${productId} not found`);
+        }
+    
+        // Presumably update or process the wanted count here
+        console.log("Product General:", productVariant);
+    
+        // Return appropriate response or update result
+        return { message: "Wanted product count updated", product: productVariant };
     }
 }

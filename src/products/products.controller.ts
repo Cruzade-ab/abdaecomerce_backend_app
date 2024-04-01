@@ -24,14 +24,14 @@ export class ProductsController {
     }
 
     @Post('/getProductById')
-    async getProductById(@Body() id: { productId: number }): Promise<GeneralProductDTO[] | null> {
-        console.log("Entering getProductById", id.productId);
-        return this.productsService.getProductById(id.productId);
+    async getProductById(@Body('productVariantId') productVariantId: number): Promise<GeneralProductDTO[] | null> {
+        console.log("Entering getProductById", productVariantId);
+        return this.productsService.getProductById(productVariantId);
     }
 
-    @Post('/wantedProduct')
-    async setWantedProductCount(@Body() id: { productId: number }) {
-        console.log("Wanted product recived", WantedProductDTO)
-        return this.productsService.setWantedProductCount(id.productId)
+    @Post('/addCountMostWanted')
+    async setWantedProductCount(@Body('productId') productId: number) {
+        console.log("Wanted product recived", productId)
+        return this.productsService.setWantedProductCount(productId)
     }
 }

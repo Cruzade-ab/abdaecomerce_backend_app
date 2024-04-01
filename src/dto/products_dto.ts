@@ -12,7 +12,7 @@
     general_product_id: number;
     brand: BrandDTO;
     general_product_name: string;
-    description: string;
+    description: string;  
     section: SectionDTO;
     products: ProductDTO[];
   }
