@@ -8,7 +8,7 @@ import { WantedProductDTO } from 'src/dto/wanted_product';
 export class ProductsService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async getWantedProducts(): Promise<GeneralProductDTO[]> {
+    async getAllProducts(): Promise<GeneralProductDTO[]> {
         const products = await this.prisma.generalProduct.findMany({
             include: {
                 Brand: true,
@@ -236,24 +236,98 @@ export class ProductsService {
         
         return GeneralProduct
     }
+    async setWantedProductCount(productVariantId: number) {
+        console.log("Setting wanted count for product variant ID:", productVariantId);
     
-    async setWantedProductCount(id: number) {
-        console.log("Setting wanted count for product by Id:", id);
-
-        const productId = parseInt(id.toString(), 10);
-    
-        const productVariant = await this.prisma.product.findFirst({
-            where: { product_id: productId }
+        const productVariant = await this.prisma.product.findUnique({
+            where: { product_id: productVariantId }
         });
     
         if (!productVariant) {
-            throw new Error(`Product with ID ${productId} not found`);
+            throw new Error(`Product variant with ID ${productVariantId} not found`);
         }
     
-        // Presumably update or process the wanted count here
-        console.log("Product General:", productVariant);
+        // Now using the general_product_id from the productVariant
+        const generalProductId = productVariant.general_product_id;
     
-        // Return appropriate response or update result
-        return { message: "Wanted product count updated", product: productVariant };
+        const wantedProduct = await this.prisma.wantedProduct.upsert({
+            where: { general_product_id: generalProductId },
+            update: {
+                most_wanted_product_count: {
+                    increment: 1
+                }
+            },
+            create: {
+                general_product_id: generalProductId,
+                most_wanted_product_count: 1
+            }
+        });
+    
+        console.log("Wanted product count updated for general product ID:", generalProductId);
+    
+        return { message: "Wanted product count updated", product: wantedProduct };
+    }
+    
+    async getWantedProducts(): Promise<GeneralProductDTO[]> {
+        const products = await this.prisma.generalProduct.findMany({
+            include: {
+                Brand: true,
+                Section: true, 
+                products: {
+                    include: {
+                        Color: true, 
+                        Size_Amount: { 
+                            include: {
+                                Size: true 
+                            }
+                        },
+                    },
+                },
+                wantedproducts: true  // Include wantedproducts relation
+            }
+        });
+
+        products.sort((a, b) => {
+            const countA = a.wantedproducts?.most_wanted_product_count ?? 0;
+            const countB = b.wantedproducts?.most_wanted_product_count ?? 0;
+            // Sort by count descending, but if counts are equal, sort by general_product_id ascending
+            return countB !== countA ? countB - countA : a.general_product_id - b.general_product_id;
+        });
+    
+        const wantedOrder = products.map((gp) => ({
+            general_product_id: gp.general_product_id,
+            general_product_name: gp.general_product_name,
+            description: gp.description,
+            section: {
+                section_id: gp.Section.section_id,
+                section_name: gp.Section.section_name
+            },
+            brand: {
+                brand_id: gp.Brand.brand_id,
+                brand_name: gp.Brand.brand_name
+            },
+            products: gp.products.map((p) => ({
+                product_id: p.product_id,
+                value: p.value,
+                color: {
+                    color_id: p.Color.color_id,
+                    color_name: p.Color.color_name
+                },
+                image_url: p.image_url,
+                hover_image_url: p.hover_image_url,
+                size_amount: {
+                    size_amount_id: p.Size_Amount.size_amount_id,
+                    size_amount: p.Size_Amount.size_amount
+                },
+                size: {
+                    size_id: p.Size_Amount.Size.size_id,
+                    size_name: p.Size_Amount.Size.size_type
+                }
+            })),
+            wantedCount: gp.wantedproducts?.most_wanted_product_count || 0 
+        }));
+        console.log(wantedOrder)
+
+        return wantedOrder
     }
 }
