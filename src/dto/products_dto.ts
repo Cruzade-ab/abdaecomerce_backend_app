@@ -12,7 +12,8 @@
     general_product_id: number;
     brand: BrandDTO;
     general_product_name: string;
-    description: string;
+    wantedCount?: number;
+    description: string;  
     section: SectionDTO;
     products: ProductDTO[];
   }
