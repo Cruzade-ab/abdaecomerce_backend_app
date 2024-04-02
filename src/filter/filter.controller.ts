@@ -7,6 +7,7 @@ import { GeneralProductDTO } from 'src/dto/products_dto';
 export class FilterController {
   constructor(private readonly filterService: FilterService) {}
 
+  @Get('')
   async filterProducts(
     @Query('brand') brand?: string,
     @Query('color') color?: string,
