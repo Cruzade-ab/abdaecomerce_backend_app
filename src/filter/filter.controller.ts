@@ -5,33 +5,45 @@ import { GeneralProductDTO } from 'src/dto/products_dto';
 @Injectable()
 @Controller('/api/filter')
 export class FilterController {
-  constructor(private readonly filterService: FilterService) {}
+  constructor(private readonly filterService: FilterService) { }
 
-  @Get('')
+  @Get()
   async filterProducts(
-    @Query('brand') brand?: string,
-    @Query('color') color?: string,
-    @Query('section') section?: string,
-    @Query('min_value') minValue?: number,
-    @Query('max_value') maxValue?: number,
-): Promise<GeneralProductDTO[]> {
-    return this.filterService.filterProducts({ brand, color, section, minValue, maxValue });
-}
+    @Query('brand_name') brandName?: string,
+    @Query('section_name') sectionName?: string,
+    @Query('color_name') colorName?: string,
+    @Query('min_value') minValue?: string,
+    @Query('max_value') maxValue?: string
+  ): Promise<GeneralProductDTO[]> {
+    console.log('Brand:', brandName);
+    console.log('Section:', sectionName);
+    console.log('Color:', colorName);
+    console.log('Min Value:', minValue);
+    console.log('Max Value:', maxValue);
+
+    return this.filterService.filterProducts({
+      brand: brandName,
+      section: sectionName,
+      color: colorName,
+      minValue: minValue ? parseFloat(minValue) : undefined,
+      maxValue: maxValue ? parseFloat(maxValue) : undefined
+    });
+  }
 
   @Get('brands')
-  async getBrands(){
+  async getBrands() {
     return this.filterService.getAllBrands()
   }
   @Get('colors')
-  async getColors(){
+  async getColors() {
     return this.filterService.getAllColors()
   }
 
 
   @Get('sections')
-  async getSections(){
+  async getSections() {
     return this.filterService.getAllSections()
-    
+
   }
 
 
