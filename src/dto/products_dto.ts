@@ -1,4 +1,13 @@
-  // DTOs
+// DTOs
+export class GeneralProductDTO {
+  general_product_id: number;
+  brand: BrandDTO;
+  general_product_name: string;
+  wantedCount?: number;
+  description: string;  
+  section: SectionDTO;
+  products: ProductDTO[];
+}
   export class ProductDTO {
     product_id: number;
     value: number;
@@ -8,15 +17,6 @@
     size_amount: SizeAmountDTO;
   }
   
-  export class GeneralProductDTO {
-    general_product_id: number;
-    brand: BrandDTO;
-    general_product_name: string;
-    wantedCount?: number;
-    description: string;  
-    section: SectionDTO;
-    products: ProductDTO[];
-  }
   
   export class BrandDTO {
     brand_id?: number;

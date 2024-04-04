@@ -6,6 +6,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { FilterModule } from './filter/filter.module';
+import { SearchModule } from './search/search.module';
 
 
 
@@ -13,6 +14,6 @@ import { FilterModule } from './filter/filter.module';
   imports: [ConfigModule.forRoot({
     isGlobal: true, 
   }),
-  UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule, FilterModule],
+  UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule, FilterModule, SearchModule],
 })
 export class AppModule {}
