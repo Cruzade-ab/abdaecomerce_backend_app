@@ -10,7 +10,7 @@ datasource db {
 model Role {
   role_id   Int    @id @unique @default(autoincrement())
   role_type String
-  User      User[]
+  users     User[]
 }
 
 model User {
@@ -20,8 +20,9 @@ model User {
   email     String  @unique
   password  String
   role_id   Int     @default(1)
-  Order     Order[]
+  orders    Order[]
   Role      Role    @relation(fields: [role_id], references: [role_id])
+  cart      Cart?   // One-to-one relation with Cart
 }
 
 model Color {
@@ -43,7 +44,7 @@ model GeneralProduct {
   general_product_name String
   description          String
   Brand                Brand          @relation(fields: [brand_id], references: [brand_id])
-  Section            Section         @relation(fields: [section_id], references: [section_id])
+  Section              Section        @relation(fields: [section_id], references: [section_id])
   products             Product[]
   wantedproducts       WantedProduct?
 }
@@ -56,13 +57,13 @@ model WantedProduct {
 
 model Section {
   section_id   Int       @id @default(autoincrement())
-  section_name String     @unique
-  GeneralProduct GeneralProduct[]
+  section_name String    @unique
+  generalProducts GeneralProduct[]
 }
 
 model Size {
   size_id      Int           @id @unique @default(autoincrement())
-  size_type    String         @unique
+  size_type    String        @unique
   size_amounts Size_Amount[]
 }
 
@@ -80,12 +81,13 @@ model Product {
   color_id           Int
   size_amount_id     Int
   general_product_id Int
-  image_url          String?  // Add image URL field for the product
-  hover_image_url    String?  // Add hover image URL field for the product
-  Color              Color           @relation(fields: [color_id], references: [color_id])
-  GeneralProduct     GeneralProduct  @relation(fields: [general_product_id], references: [general_product_id])
-  Size_Amount        Size_Amount     @relation(fields: [size_amount_id], references: [size_amount_id])
-  Product_Order      Product_Order[]
+  image_url          String?          // Add image URL field for the product
+  hover_image_url    String?          // Add hover image URL field for the product
+  color              Color            @relation(fields: [color_id], references: [color_id])
+  generalProduct     GeneralProduct   @relation(fields: [general_product_id], references: [general_product_id])
+  sizeAmount         Size_Amount      @relation(fields: [size_amount_id], references: [size_amount_id])
+  productOrders      Product_Order[]
+  cartItems          CartItem[]
 }
 
 model Order {
@@ -94,14 +96,34 @@ model Order {
   user_id            Int
   purchased_products Int
   order_total        Float
-  User               User   @relation(fields: [user_id], references: [user_id])
+  user               User   @relation(fields: [user_id], references: [user_id])
 }
 
 model Product_Order {
-  product_order_id Int     @id @unique @default(autoincrement())
-  order_id         Int
-  product_id       Int
-  product_quantity Int
-  product_total    Float
-  Product          Product @relation(fields: [product_id], references: [product_id])
+  product_order_id   Int     @id @unique @default(autoincrement())
+  order_id           Int
+  product_id         Int
+  product_quantity   Int
+  product_total      Float
+  product            Product @relation(fields: [product_id], references: [product_id])
+}
+
+model Cart {
+  cart_id       Int      @id @unique @default(autoincrement())
+  user_id       Int      @unique
+  user          User     @relation(fields: [user_id], references: [user_id])
+  cartItems     CartItem[]  // Relationship to CartItem model
+  cart_total    Float
+}
+
+model CartItem {
+  cart_item_id       Int       @id @unique @default(autoincrement())
+  cart_id            Int
+  product_id         Int
+  product_quantity   Int
+  product_price     Float
+  product            Product   @relation(fields: [product_id], references: [product_id])
+  cart               Cart      @relation(fields: [cart_id], references: [cart_id])
+
+  @@unique([cart_id, product_id])  // Ensure uniqueness of cart-item combinations
 }
