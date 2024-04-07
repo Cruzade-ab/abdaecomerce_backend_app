@@ -143,3 +143,5 @@ model CartItem {
 
   @@unique([cart_id, product_id])  // Ensure uniqueness of cart-item combinations
 }
+
+
