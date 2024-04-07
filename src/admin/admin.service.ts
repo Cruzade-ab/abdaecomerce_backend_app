@@ -115,4 +115,6 @@ export class AdminService {
             throw new HttpException('Failed to create product', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    
 }
