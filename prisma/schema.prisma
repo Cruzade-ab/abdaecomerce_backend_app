@@ -20,14 +20,15 @@ model User {
   email     String  @unique
   password  String
   role_id   Int     @default(1)
+  Cart      Cart?
   Order     Order[]
   Role      Role    @relation(fields: [role_id], references: [role_id])
 }
 
 model Color {
-  color_id        Int       @id @unique @default(autoincrement())
-  color_name      String    @unique
-  products        Product[]
+  color_id   Int       @id @unique @default(autoincrement())
+  color_name String    @unique
+  products   Product[]
 }
 
 model Brand {
@@ -43,7 +44,7 @@ model GeneralProduct {
   general_product_name String
   description          String
   Brand                Brand          @relation(fields: [brand_id], references: [brand_id])
-  Section            Section         @relation(fields: [section_id], references: [section_id])
+  Section              Section        @relation(fields: [section_id], references: [section_id])
   products             Product[]
   wantedproducts       WantedProduct?
 }
@@ -55,14 +56,14 @@ model WantedProduct {
 }
 
 model Section {
-  section_id   Int       @id @default(autoincrement())
-  section_name String     @unique
+  section_id     Int              @id @default(autoincrement())
+  section_name   String           @unique
   GeneralProduct GeneralProduct[]
 }
 
 model Size {
   size_id      Int           @id @unique @default(autoincrement())
-  size_type    String         @unique
+  size_type    String        @unique
   size_amounts Size_Amount[]
 }
 
@@ -80,8 +81,9 @@ model Product {
   color_id           Int
   size_amount_id     Int
   general_product_id Int
-  image_url          String?  // Add image URL field for the product
-  hover_image_url    String?  // Add hover image URL field for the product
+  hover_image_url    String?
+  image_url          String?
+  CartItem           CartItem[]
   Color              Color           @relation(fields: [color_id], references: [color_id])
   GeneralProduct     GeneralProduct  @relation(fields: [general_product_id], references: [general_product_id])
   Size_Amount        Size_Amount     @relation(fields: [size_amount_id], references: [size_amount_id])
@@ -104,4 +106,23 @@ model Product_Order {
   product_quantity Int
   product_total    Float
   Product          Product @relation(fields: [product_id], references: [product_id])
+}
+
+model Cart {
+  cart_id          Int        @id @unique @default(autoincrement())
+  user_id          Int        @unique
+  cart_total_price Float
+  User             User       @relation(fields: [user_id], references: [user_id])
+  CartItem         CartItem[]
+}
+
+model CartItem {
+  cart_item_id  Int     @id @unique @default(autoincrement())
+  cart_id       Int
+  product_id    Int
+  product_price Float
+  Cart          Cart    @relation(fields: [cart_id], references: [cart_id])
+  Product       Product @relation(fields: [product_id], references: [product_id])
+
+  @@unique([cart_id, product_id])
 }
