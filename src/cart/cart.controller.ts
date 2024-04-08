@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param } from '@nestjs/common';
+import { Controller, Post, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { AddToCartDto } from 'src/dto/cart-item.dto';
 
@@ -8,7 +8,7 @@ export class CartController {
 
   @Post(':userId/add-product')
   async addProductToCart(
-    @Param('userId') userId: number,
+    @Param('userId', ParseIntPipe) userId: number, // Utilizar ParseIntPipe para convertir el parámetro a un número
     @Body() addToCartDto: AddToCartDto,
   ) {
     await this.cartService.addProductToCart(userId, addToCartDto);

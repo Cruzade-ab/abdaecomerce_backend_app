@@ -40,5 +40,8 @@ export class CartService {
         size: item.product.size_amount_id, 
         totalPrice: updatedCart.cart_total_price,
       }));
+      
+      
+      
   }
 }

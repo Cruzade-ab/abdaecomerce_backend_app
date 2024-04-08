@@ -19,5 +19,12 @@ export class CartItemDto {
     imageUrl: string;
     size: number;
     totalPrice: number;
-  }
+}
+
+export class initiaizeCardDto {
+  cartId: number;
+  userId: number;
+  cartItems: CartItemDto[];
+  cartTotalPrice: number;
+}
   
