@@ -1,30 +1,7 @@
-import { IsNumber, IsPositive } from 'class-validator';
-
-export class AddToCartDto {
-  @IsNumber()
-  @IsPositive()
-  productId: number;
-
-  @IsNumber()
-  @IsPositive()
-  sizeId: number;
-
-  @IsNumber()
-  @IsPositive()
-  productPrice: number;
+export class CartDisplayDto {
+  readonly product_price: number;
+  readonly cart_total_price: number;
+  readonly size_available: number;
+  readonly image_url: string;
 }
 
-export class CartItemDto {
-    productPrice: number;
-    imageUrl: string;
-    size: number;
-    totalPrice: number;
-}
-
-export class initiaizeCardDto {
-  cartId: number;
-  userId: number;
-  cartItems: CartItemDto[];
-  cartTotalPrice: number;
-}
-  
