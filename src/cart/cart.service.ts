@@ -8,6 +8,7 @@ export class CartService {
 
   // Método para añadir un producto al carrito de un usuario
   async addToCart(userId: number, productId: number, quantity: number): Promise<void> {
+    console.log('Agregando Producto: ', productId)
     // Buscar si el usuario ya tiene un carrito
     let cart = await this.prisma.cart.findUnique({
       where: { user_id: userId },
@@ -92,14 +93,19 @@ export class CartService {
         },
       },
     });
-  
-    return cartItems.map(item => ({
+
+    const cartToReturn = cartItems.map(item => ({
       product_id: item.product_id,
       product_price: item.product.value,
       quantity: item.product_quantity,
       size_available: item.product.Size_Amount.size_amount, // Accede a la propiedad size_amount
       image_url: item.product.image_url,
     }));
+
+    console.log(cartToReturn);
+  
+    return cartToReturn
+
   }
   
   
