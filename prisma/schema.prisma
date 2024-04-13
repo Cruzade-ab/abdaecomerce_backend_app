@@ -1,22 +1,18 @@
-// Define el cliente de Prisma para interactuar con la base de datos
 generator client {
   provider = "prisma-client-js"
 }
 
-// Configuración de la fuente de datos, en este caso, una base de datos PostgreSQL
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Modelo para los roles de usuario (ej: administrador, cliente)
 model Role {
   role_id   Int    @id @unique @default(autoincrement())
   role_type String
-  User     User[]
+  User      User[]
 }
 
-// Modelo para los usuarios del sistema
 model User {
   user_id   Int     @id @unique @default(autoincrement())
   name      String
@@ -24,26 +20,23 @@ model User {
   email     String  @unique
   password  String
   role_id   Int     @default(1)
-  Order    Order[]
+  cart      Cart?
+  Order     Order[]
   Role      Role    @relation(fields: [role_id], references: [role_id])
-  cart      Cart?   // One-to-one relation with Cart
 }
 
-// Modelo para los colores de los productos
 model Color {
-  color_id        Int       @id @unique @default(autoincrement())
-  color_name      String    @unique
-  products        Product[]
+  color_id   Int       @id @unique @default(autoincrement())
+  color_name String    @unique
+  products   Product[]
 }
 
-// Modelo para las marcas de los productos
 model Brand {
   brand_id   Int              @id @unique @default(autoincrement())
   brand_name String
   products   GeneralProduct[]
 }
 
-// Modelo para productos generales (ej: modelo de camiseta, sin considerar color o talla)
 model GeneralProduct {
   general_product_id   Int            @id @default(autoincrement())
   brand_id             Int
@@ -56,29 +49,24 @@ model GeneralProduct {
   wantedproducts       WantedProduct?
 }
 
-// Modelo para destacar los productos más deseados
 model WantedProduct {
   general_product_id        Int            @id
   most_wanted_product_count Int
   GeneralProduct            GeneralProduct @relation(fields: [general_product_id], references: [general_product_id])
 }
 
-// Modelo para las secciones de la tienda (ej: hombres, mujeres, ambos)
 model Section {
-  section_id   Int       @id @default(autoincrement())
-  section_name String    @unique
+  section_id     Int              @id @default(autoincrement())
+  section_name   String           @unique
   GeneralProduct GeneralProduct[]
 }
 
-// Modelo para las tallas de los productos
 model Size {
   size_id      Int           @id @unique @default(autoincrement())
   size_type    String        @unique
   size_amounts Size_Amount[]
 }
 
-
-// Modelo para manejar la cantidad disponible de un producto específico por talla
 model Size_Amount {
   size_amount_id Int       @id @unique @default(autoincrement())
   size_id        Int
@@ -87,23 +75,21 @@ model Size_Amount {
   Size           Size      @relation(fields: [size_id], references: [size_id])
 }
 
-// Modelo para instancias específicas de productos (incluyendo talla, color, etc.)
 model Product {
   product_id         Int             @id @unique @default(autoincrement())
   value              Float
   color_id           Int
   size_amount_id     Int
   general_product_id Int
-  image_url          String?          // Add image URL field for the product
-  hover_image_url    String?          // Add hover image URL field for the product
-  Color              Color            @relation(fields: [color_id], references: [color_id])
-  GeneralProduct     GeneralProduct   @relation(fields: [general_product_id], references: [general_product_id])
-  Size_Amount         Size_Amount      @relation(fields: [size_amount_id], references: [size_amount_id])
-  Product_Order      Product_Order[]
+  hover_image_url    String?
+  image_url          String?
   cartItems          CartItem[]
+  Color              Color           @relation(fields: [color_id], references: [color_id])
+  GeneralProduct     GeneralProduct  @relation(fields: [general_product_id], references: [general_product_id])
+  Size_Amount        Size_Amount     @relation(fields: [size_amount_id], references: [size_amount_id])
+  Product_Order      Product_Order[]
 }
 
-// Modelo para las órdenes de compra de los usuarios
 model Order {
   order_id           Int    @id @unique @default(autoincrement())
   address_direction  String
@@ -113,36 +99,31 @@ model Order {
   User               User   @relation(fields: [user_id], references: [user_id])
 }
 
-// Modelo para detallar los productos dentro de una orden de compra
 model Product_Order {
-  product_order_id   Int     @id @unique @default(autoincrement())
-  order_id           Int
-  product_id         Int
-  product_quantity   Int
-  product_total      Float
-  Product            Product @relation(fields: [product_id], references: [product_id])
+  product_order_id Int     @id @unique @default(autoincrement())
+  order_id         Int
+  product_id       Int
+  product_quantity Int
+  product_total    Float
+  Product          Product @relation(fields: [product_id], references: [product_id])
 }
 
-// Modelo para los carritos de compra de los usuarios
 model Cart {
-  cart_id       Int      @id @unique @default(autoincrement())
-  user_id       Int      @unique
-  user          User     @relation(fields: [user_id], references: [user_id])
-  cartItems     CartItem[]  // Relationship to CartItem model
-  cart_total_price    Float
+  cart_id          Int        @id @unique @default(autoincrement())
+  user_id          Int        @unique
+  cart_total_price Float
+  user             User       @relation(fields: [user_id], references: [user_id])
+  cartItems        CartItem[]
 }
 
-// Modelo para los ítems dentro del carrito de compra
 model CartItem {
-  cart_item_id       Int       @id @unique @default(autoincrement())
-  cart_id            Int
-  product_id         Int
-  product_price     Float
-  product            Product   @relation(fields: [product_id], references: [product_id])
-  cart               Cart      @relation(fields: [cart_id], references: [cart_id])
-  quantity           Int 
+  cart_item_id     Int     @id @unique @default(autoincrement())
+  cart_id          Int
+  product_id       Int
+  product_price    Float
+  product_quantity Int
+  cart             Cart    @relation(fields: [cart_id], references: [cart_id])
+  product          Product @relation(fields: [product_id], references: [product_id])
 
-  @@unique([cart_id, product_id])  // Ensure uniqueness of cart-item combinations
+  @@unique([cart_id, product_id])
 }
-
-

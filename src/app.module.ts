@@ -9,6 +9,7 @@ import { FilterModule } from './filter/filter.module';
 import { SearchModule } from './search/search.module';
 import { CartService } from './cart/cart.service';
 import { CartModule } from './cart/cart.module';
+import { UserService } from './user/user.service';
 
 
 
@@ -17,6 +18,6 @@ import { CartModule } from './cart/cart.module';
     isGlobal: true, 
   }),
   UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule, FilterModule, SearchModule, CartModule],
-  providers: [CartService],
+  providers: [CartService, UserService],
 })
 export class AppModule {}
