@@ -7,5 +7,9 @@ export class CartService {
         ;
     }
 
+    async getCartInfo(): Promise<any> {
+        ;
+    }
+
 
 }

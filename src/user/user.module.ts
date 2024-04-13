@@ -7,7 +7,8 @@ import { JwtModule } from '@nestjs/jwt';
 @Module({
   controllers: [UserController],
   providers: [UserService],
-  imports: [PrismaModule, JwtModule.register({secret: 'tuClaveSecreta', signOptions: {expiresIn: '1h'}})]
+  imports: [PrismaModule, JwtModule.register({secret: 'tuClaveSecreta', signOptions: {expiresIn: '1h'}})],
+  exports: [UserService, JwtModule] 
 })
 export class UserModule {}
 

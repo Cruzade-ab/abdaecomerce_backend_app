@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post , Param} from '@nestjs/common';
 import { GeneralProductDTO } from 'src/dto/products_dto';
 import { ProductsService } from './products.service';
-import { WantedProductDTO } from 'src/dto/wanted_product';
+
 
 @Controller('api/products')
 export class ProductsController {
