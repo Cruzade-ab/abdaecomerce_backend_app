@@ -10,3 +10,4 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [PrismaModule, JwtModule.register({secret: 'tuClaveSecreta', signOptions: {expiresIn: '1h'}})]
 })
 export class UserModule {}
+

@@ -138,6 +138,7 @@ model CartItem {
   cart_id            Int
   product_id         Int
   product_price     Float
+  product_quantity   Int
   product            Product   @relation(fields: [product_id], references: [product_id])
   cart               Cart      @relation(fields: [cart_id], references: [cart_id])
 
