@@ -140,6 +140,7 @@ model CartItem {
   product_price     Float
   product            Product   @relation(fields: [product_id], references: [product_id])
   cart               Cart      @relation(fields: [cart_id], references: [cart_id])
+  quantity           Int 
 
   @@unique([cart_id, product_id])  // Ensure uniqueness of cart-item combinations
 }
