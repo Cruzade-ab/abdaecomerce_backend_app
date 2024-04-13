@@ -1,27 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { CartDisplayDto } from 'src/dto/cart-item.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class CartService {
   constructor(private prisma: PrismaService) {}
 
-  async addToCart(userId: number, productId: number, quantity: number): Promise<any> {
-    // Verificar si el usuario ya tiene un carrito
+  // Método para añadir un producto al carrito de un usuario
+  async addToCart(userId: number, productId: number, quantity: number): Promise<void> {
+    // Buscar si el usuario ya tiene un carrito
     let cart = await this.prisma.cart.findUnique({
       where: { user_id: userId },
     });
 
-    // Si no tiene un carrito, crear uno
+    // Si no existe un carrito, crear uno nuevo con precio total inicial de 0
     if (!cart) {
       cart = await this.prisma.cart.create({
         data: {
           user_id: userId,
-          cart_total_price: 0, // Inicializar con un total de 0
+          cart_total_price: 0,
         },
       });
     }
 
-    // Verificar si el producto ya está en el carrito
+    // Buscar si el producto ya está en el carrito
     let cartItem = await this.prisma.cartItem.findUnique({
       where: {
         cart_id_product_id: {
@@ -31,9 +33,9 @@ export class CartService {
       },
     });
 
-    // Si el producto ya está en el carrito, actualizar la cantidad
+    // Si el producto ya está en el carrito, incrementar la cantidad
     if (cartItem) {
-      cartItem = await this.prisma.cartItem.update({
+      await this.prisma.cartItem.update({
         where: {
           cart_item_id: cartItem.cart_item_id,
         },
@@ -44,8 +46,8 @@ export class CartService {
         },
       });
     } else {
-      // Si el producto no está en el carrito, agregarlo
-      cartItem = await this.prisma.cartItem.create({
+      // Si el producto no está en el carrito, agregarlo con la cantidad especificada
+      await this.prisma.cartItem.create({
         data: {
           cart: {
             connect: { cart_id: cart.cart_id },
@@ -53,50 +55,54 @@ export class CartService {
           product: {
             connect: { product_id: productId },
           },
-          product_price: 0, // El precio se actualizará después de calcularlo
+          product_price: 0, // El precio se inicializa en 0 y se actualizará más adelante
           product_quantity: quantity,
         },
       });
     }
 
-    // Obtener el precio del producto y actualizar el precio del ítem del carrito
+    // Buscar el producto para obtener su precio
     const product = await this.prisma.product.findUnique({
       where: { product_id: productId },
-      include: { Size_Amount: true },
     });
 
+    // Si el producto no se encuentra, lanzar un error
     if (!product) {
       throw new Error('Producto no encontrado');
     }
 
+    // Calcular el precio total del producto basado en la cantidad y actualizar el carrito
     const productTotalPrice = product.value * quantity;
 
-    await this.prisma.cartItem.update({
-      where: {
-        cart_item_id: cartItem.cart_item_id,
-      },
-      data: {
-        product_price: product.value, // Actualizar con el precio del producto
-      },
-    });
-
-    // Actualizar el precio total del carrito
     await this.prisma.cart.update({
       where: { cart_id: cart.cart_id },
       data: { cart_total_price: { increment: productTotalPrice } },
     });
-
-    // Crear DTO para enviar al frontend
-    const cartDisplayDto = {
-      product_id: productId,
-      product_price: product.value,
-      quantity: quantity,
-      size_available: product.Size_Amount.size_amount, // Asumiendo que hay una relación directa entre Product y Size_Amount
-      image_url: product.image_url,
-    };
-
-    return cartDisplayDto;
   }
 
-  // Implementar el resto de los métodos según sea necesario
+  
+  async getCartInfo(userId: number): Promise<CartDisplayDto[]> {
+    const cartItems = await this.prisma.cartItem.findMany({
+      where: { cart: { user_id: userId } },
+      include: {
+        product: {
+          include: {
+            Size_Amount: true, // Incluye la relación Size_Amount
+          },
+        },
+      },
+    });
+  
+    return cartItems.map(item => ({
+      product_id: item.product_id,
+      product_price: item.product.value,
+      quantity: item.product_quantity,
+      size_available: item.product.Size_Amount.size_amount, // Accede a la propiedad size_amount
+      image_url: item.product.image_url,
+    }));
+  }
+  
+  
+  
+
 }
