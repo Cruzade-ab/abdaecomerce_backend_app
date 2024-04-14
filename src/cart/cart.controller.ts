@@ -61,5 +61,4 @@ export class CartController {
     }
   }
 
-  // ... cualquier otro método que puedas tener ...
 }

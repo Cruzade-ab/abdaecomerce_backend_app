@@ -10,6 +10,7 @@ import { SearchModule } from './search/search.module';
 import { CartService } from './cart/cart.service';
 import { CartModule } from './cart/cart.module';
 import { UserService } from './user/user.service';
+import { OrderModule } from './order/order.module';
 
 
 
@@ -17,7 +18,7 @@ import { UserService } from './user/user.service';
   imports: [ConfigModule.forRoot({
     isGlobal: true, 
   }),
-  UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule, FilterModule, SearchModule, CartModule],
+  UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule, FilterModule, SearchModule, CartModule, OrderModule],
   providers: [CartService, UserService],
 })
 export class AppModule {}

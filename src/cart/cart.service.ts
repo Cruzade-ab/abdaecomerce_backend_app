@@ -147,4 +147,13 @@ export class CartService {
       data: { cart_total_price: { decrement: productTotalPrice } },
     });
   }
+
+  async resetCart(){
+    return ;
+
+    //Se debe Devolver un mensaje de exito / error. Similar a:
+    // return response.status(HttpStatus.OK).json({ message: 'Product added to cart successfully' });
+    // return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error', error: error.message });
+    //pero NO Http Status
+  }
 }
