@@ -41,4 +41,25 @@ export class CartController {
     }
     return this.cartService.getCartInfo(user.user_id);
   }
+
+  @Post('deleteCartItem')
+  async deleteCartItem(
+    @Req() request: Request,
+    @Body('productId') productId: number,
+    @Res() response: Response
+  ): Promise<any> {
+    try {
+      const user = await this.userService.getUserFromToken(request);
+      if (!user) {
+        return response.status(HttpStatus.UNAUTHORIZED).json({ message: 'Usuario no autenticado' });
+      }
+      await this.cartService.deleteCartItem(user.user_id, productId);
+      return response.status(HttpStatus.OK).json({ message: 'Elemento eliminado del carrito exitosamente' });
+    } catch (error) {
+      console.error("Error al eliminar el elemento del carrito:", error);
+      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error del Servidor Interno', error: error.message });
+    }
+  }
+
+  // ... cualquier otro método que puedas tener ...
 }
