@@ -107,8 +107,44 @@ export class CartService {
     return cartToReturn
 
   }
-  
-  
-  
 
+
+  async deleteCartItem(userId: number, productId: number): Promise<void> {
+    // Buscar el carrito del usuario
+    const cart = await this.prisma.cart.findUnique({
+      where: { user_id: userId },
+    });
+  
+    if (!cart) {
+      throw new Error('Carrito no encontrado');
+    }
+  
+    // Buscar el elemento del carrito para eliminar
+    const cartItem = await this.prisma.cartItem.findUnique({
+      where: {
+        cart_id_product_id: {
+          cart_id: cart.cart_id,
+          product_id: productId,
+        },
+      },
+    });
+  
+    if (!cartItem) {
+      throw new Error('Elemento del carrito no encontrado');
+    }
+  
+    // Eliminar el elemento del carrito
+    await this.prisma.cartItem.delete({
+      where: {
+        cart_item_id: cartItem.cart_item_id,
+      },
+    });
+  
+    // Actualizar el precio total del carrito
+    const productTotalPrice = cartItem.product_price * cartItem.product_quantity;
+    await this.prisma.cart.update({
+      where: { cart_id: cart.cart_id },
+      data: { cart_total_price: { decrement: productTotalPrice } },
+    });
+  }
 }
