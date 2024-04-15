@@ -15,3 +15,10 @@ export class CartDisplayDto {
     readonly image_url: string;
   }
   
+
+  export class OrderForm {
+    readonly address: string;
+    readonly city: string;
+    readonly state: string;
+    readonly zip_code: string;
+}
