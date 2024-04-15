@@ -5,6 +5,13 @@ import { AdminModule } from './admin/admin.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { FilterModule } from './filter/filter.module';
+import { SearchModule } from './search/search.module';
+import { CartService } from './cart/cart.service';
+import { CartModule } from './cart/cart.module';
+import { UserService } from './user/user.service';
+import { OrderModule } from './order/order.module';
+import { MailService } from './mail/mail.service';
 
 
 
@@ -12,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [ConfigModule.forRoot({
     isGlobal: true, 
   }),
-  UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule],
+  UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule, FilterModule, SearchModule, CartModule, OrderModule],
+  providers: [CartService, UserService, MailService],
 })
 export class AppModule {}
