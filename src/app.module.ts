@@ -11,6 +11,7 @@ import { CartService } from './cart/cart.service';
 import { CartModule } from './cart/cart.module';
 import { UserService } from './user/user.service';
 import { OrderModule } from './order/order.module';
+import { MailService } from './mail/mail.service';
 
 
 
@@ -19,6 +20,6 @@ import { OrderModule } from './order/order.module';
     isGlobal: true, 
   }),
   UserModule, ProductsModule, AdminModule, CloudinaryModule, PrismaModule, FilterModule, SearchModule, CartModule, OrderModule],
-  providers: [CartService, UserService],
+  providers: [CartService, UserService, MailService],
 })
 export class AppModule {}

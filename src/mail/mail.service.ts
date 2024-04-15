@@ -1,7 +1,10 @@
 // Importing NodeMailer
-import nodemailer from 'nodemailer';
+import { Injectable } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
+
 
 // Defining the MailService class
+@Injectable()
 export class MailService {
     private transporter: nodemailer.Transporter;
 
