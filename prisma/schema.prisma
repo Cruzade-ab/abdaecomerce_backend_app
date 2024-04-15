@@ -20,10 +20,10 @@ model User {
   email     String   @unique
   password  String
   role_id   Int      @default(1)
+  Adress    Adress[]
   cart      Cart?
   Order     Order[]
   Role      Role     @relation(fields: [role_id], references: [role_id])
-  Adress    Adress[]
 }
 
 model Color {
@@ -93,12 +93,12 @@ model Product {
 
 model Order {
   order_id           Int    @id @unique @default(autoincrement())
-  address_id         Int
   user_id            Int
   purchased_products Int
   order_total        Float
-  User               User   @relation(fields: [user_id], references: [user_id])
+  address_id         Int
   Adress             Adress @relation(fields: [address_id], references: [adress_id])
+  User               User   @relation(fields: [user_id], references: [user_id])
 }
 
 model Product_Order {
