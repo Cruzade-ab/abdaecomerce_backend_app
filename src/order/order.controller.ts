@@ -22,6 +22,7 @@ export class OrderController {
 
       // Pass the user ID to the order service
       const orderConfirmation = await this.orderService.createOrder( user.user_id, order);
+      
       return response.status(HttpStatus.OK).json({ message: 'Order Confirmed', order: orderConfirmation });
     } catch (error) {
       console.error("Error confirming Order:", error);

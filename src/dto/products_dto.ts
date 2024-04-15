@@ -46,4 +46,24 @@ export class GeneralProductDTO {
 }
 
 
+
+// _________________________________
+// Dto whitout the other DTO for Color/Size inside
+  export class Product {
+    product_id: number;
+    value: number;
+    image_url: string;
+    hover_image_url: string; 
+    color_id: number; 
+    size_amount_id: number;
+  }
+
+  export class SizeAmount {
+    size_amount_id: number;
+    size_amount: number;
+    size_id?: number;
+  }
+  
+
+
   
