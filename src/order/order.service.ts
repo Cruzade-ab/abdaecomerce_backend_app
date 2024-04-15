@@ -1,12 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { OrderForm } from 'src/dto/order-list';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Product } from '@prisma/client';
-import { SizeAmount, SizeAmountDTO } from 'src/dto/products_dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class OrderService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private mailService: MailService
+  ) { }
 
   async createOrder(userId: number, orderForm: OrderForm): Promise<any> {
     return this.prisma.$transaction(async (prisma) => {
@@ -79,11 +81,44 @@ export class OrderService {
         where: { user_id: userId },
         data: {
           cartItems: { deleteMany: {} },
-          cart_total_price: 0 
+          cart_total_price: 0
         },
       });
 
       console.log("Orden procesada Exitosamente: ", order);
+
+      const user = await this.prisma.user.findUnique({
+        where: { user_id: userId }
+      })
+
+      const emailContent = `
+        <h1>Order Confirmation</h1>
+        <p>Your order with the ID #123456 has been successfully processed.</p>
+        <p>Details:</p>
+        <ul>
+          <li>Item: Example Product</li>
+          <li>Quantity: 2</li>
+          <li>Total Price: $100</li>
+        </ul>
+        <p>Thank you for your purchase!</p>
+      `;
+
+      const emailSent = await this.mailService.send(
+
+        user.email,  // Email address (To: )
+
+        'New Order Notification',  // Subject of the email
+
+        emailContent  // HTML content of the email
+
+      );
+
+      if (!emailSent) {
+        console.error('Failed to send order notification email to admin.');
+        // Handle the failure case appropriately
+      }
+
+
       return order;
     }).catch((error) => {
       throw new HttpException(`Failed to process order: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -19,5 +19,8 @@ async function bootstrap() {
   await app.listen(port, "0.0.0.0");
   console.log("Server is running on port", port);
   console.log("Hello, world!");
+  console.log("Mail: ")
+  console.log(process.env.GOOGLE_MAIL_APP_EMAIL);
+
 }
 bootstrap();
