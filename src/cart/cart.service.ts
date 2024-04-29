@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CartDisplayDto } from 'src/dto/cart-item.dto';
+import { SizeDTO } from 'src/dto/products_dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -83,12 +84,17 @@ export class CartService {
 
   
   async getCartInfo(userId: number): Promise<CartDisplayDto[]> {
+    console.log('Getting cart info')
     const cartItems = await this.prisma.cartItem.findMany({
       where: { cart: { user_id: userId } },
       include: {
         product: {
           include: {
-            Size_Amount: true, // Incluye la relación Size_Amount
+            Size_Amount:{ 
+              include: {
+                  Size: true 
+              }
+          }
           },
         },
       },
@@ -98,6 +104,7 @@ export class CartService {
       product_id: item.product_id,
       product_price: item.product.value,
       quantity: item.product_quantity,
+      size: item.product.Size_Amount.Size.size_type,
       size_available: item.product.Size_Amount.size_amount, // Accede a la propiedad size_amount
       image_url: item.product.image_url,
     }));

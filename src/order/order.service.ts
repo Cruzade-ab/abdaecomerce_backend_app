@@ -26,7 +26,19 @@ export class OrderService {
   
         cartItems = await prisma.cartItem.findMany({
           where: { cart: { user_id: userId } },
-          include: { product: true }
+          include: {
+            product: {
+              include: {
+                GeneralProduct: true, 
+                Color: true,         
+                Size_Amount: {
+                  include: {
+                    Size: true  
+                  }
+                }
+              }
+            }
+          }
         });
   
         if (cartItems.length === 0) {
@@ -78,7 +90,8 @@ export class OrderService {
 
   private buildOrderConfirmationEmail(order, cartItems): string {
     const itemsHtml = cartItems.map(item => `
-      <li>${item.product.name}: ${item.product_quantity} x $${item.product.value.toFixed(2)} = $${(item.product_quantity * item.product.value).toFixed(2)}</li>
+      <img src="${item.product.image_url}" alt="${item.product.GeneralProduct.general_product_name}" style="width:100px;height:auto;">
+      <li> Product: ${item.product.GeneralProduct.general_product_name} - Color: ${item.product.Color.color_name} - Size: ${item.product.Size_Amount.Size.size_type}: - Quantity: ${item.product_quantity} x $${item.product.value.toFixed(2)} = $${(item.product_quantity * item.product.value).toFixed(2)}</li>
     `).join('');
   
     return `
