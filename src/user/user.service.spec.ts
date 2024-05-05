@@ -13,9 +13,18 @@ import { Response} from 'express'; // Importación de Response y Request de Expr
 describe('UserController', () => {
   let userController: UserController;
   let userService: UserService;
-  let prismaService: PrismaService; // Asegúrate de definir prismaService aquí
+  let prismaService: PrismaService;
+  let mockUsers: User[];
 
   beforeEach(async () => {
+    const mockPrismaService = {
+      user: {
+        findMany: jest.fn().mockResolvedValue(mockUsers),
+        // Otros métodos simulados si es necesario
+        create: jest.fn(),
+      },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         JwtModule.register({
@@ -27,52 +36,58 @@ describe('UserController', () => {
       controllers: [UserController],
       providers: [
         UserService,
-        PrismaService,
         {
           provide: PrismaService,
-          useValue: {
-            user: {
-              create: jest.fn().mockImplementation((userData) => Promise.resolve(userData)),
-              // Añade aquí otros métodos simulados según sea necesario
-            },
-          },
+          useValue: mockPrismaService,
         },
         {
           provide: JwtService,
           useValue: {
             signAsync: jest.fn().mockImplementation((user) => Promise.resolve('tokenSimulado')),
             verifyAsync: jest.fn().mockImplementation((token) => Promise.resolve({ email: 'test@example.com' })),
-            // Añade aquí otros métodos simulados de JwtService según sea necesario
+            // Otros métodos simulados de JwtService si es necesario
           },
         },
       ],
     }).compile();
-
+  
     userController = module.get<UserController>(UserController);
-    userService = module.get<UserService>(UserService); // Usa userService en lugar de service
-    prismaService = module.get<PrismaService>(PrismaService); // Inicializa prismaService 
+    userService = module.get<UserService>(UserService);
+    prismaService = module.get<PrismaService>(PrismaService);
   });
 
+  beforeAll(() => {
+    // Definimos mockUsers aquí
+    mockUsers = [
+      { user_id: 1, name: 'User 1', last_name: 'Last Name 1', email: 'user1@example.com', password: 'password1', role_id: 1 },
+      { user_id: 2, name: 'User 2', last_name: 'Last Name 2', email: 'user2@example.com', password: 'password2', role_id: 1 },
+      { user_id: 3, name: 'User 3', last_name: 'Last Name 3', email: 'user3@example.com', password: 'password3', role_id: 1 },
+    ];
+  });
+  
+
+  // Prueba del Register
   it('debe crear un usuario y devolver los datos del usuario creado', async () => {
     const userData: User = {
-      user_id: 1, // Un valor numérico para el ID del usuario
-      name: 'Nombre', // Un valor de cadena para el nombre del usuario
-      last_name: 'Apellido', // Un valor de cadena para el apellido del usuario
-      email: 'test@example.com', // Un valor de cadena para el correo electrónico del usuario
-      password: 'password', // Un valor de cadena para la contraseña del usuario
-      role_id: 1, // Un valor numérico para el ID del rol del usuario
+      user_id: 1,
+      name: 'Nombre',
+      last_name: 'Apellido',
+      email: 'test@example.com',
+      password: 'password',
+      role_id: 1,
     };
     const hashedPassword = await bcrypt.hash(userData.password, 12);
     const expectedUserData = { ...userData, password: hashedPassword };
-    // Simula la función 'create' del servicio Prisma para que devuelva una promesa resuelta con 'expectedUserData'
-    jest.spyOn(prismaService.user, 'create').mockResolvedValue(expectedUserData);
 
+    // Configuración del mock para la función create del servicio Prisma
+    (prismaService.user.create as jest.Mock).mockResolvedValue(expectedUserData);
 
     const result = await userService.createUser(userData);
     expect(result).toEqual(expectedUserData);
-  });// Final cuerpo Testing User
+  }); // Final cuerpo Testing User
 
-  it('should log in a user and return a success message', async () => {
+  // Prueba del log User
+  it('Debe logear un usuario y devolver un mensaje de que se logró exitosamente.', async () => {
     const mockData: User = {
       user_id: 1,
       name: 'Test',
@@ -100,7 +115,31 @@ describe('UserController', () => {
     expect(userService.logUser).toHaveBeenCalledWith(mockData, mockResponse);
     expect(result).toEqual({ message: 'Logged Successfully!' });
     expect(mockResponse.cookie).toHaveBeenCalledWith('token', expect.any(String), { httpOnly: true });
-  });
+  }); // End Log user
+
+  
+  // Prueba Get All Users.
+  it('Devuelve todos los usuarios registrados en la base de datos.', async () => {
+    // Mock de la función findMany de PrismaService para devolver los usuarios de prueba
+    jest.spyOn(prismaService.user, 'findMany').mockResolvedValue(mockUsers);
+
+    // Llamada al método getAllUsers
+    const users = await userService.getAllUsers();
+
+    // Verificación de que se devuelvan todos los usuarios esperados
+    expect(users).toEqual(mockUsers);
+  }); // Cierre Get All Users.
+  
+
+  // Manejo de error en Get All Users.
+  it('Maneja correctamente los errores al obtener usuarios.', async () => {
+    // Mock de un error al obtener usuarios
+    const errorMessage = 'Error obteniendo usuarios';
+    jest.spyOn(prismaService.user, 'findMany').mockRejectedValue(new Error(errorMessage));
+
+    // Verificación de que se maneje correctamente el error
+    await expect(userService.getAllUsers()).rejects.toThrowError(errorMessage);
+  }); // Cierre Manejo de error en Get All Users.
   
 
 }); 
