@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { OrderForm } from 'src/dto/order-list';
+import { CartDisplayDto, OrderForm } from 'src/dto/order-list';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MailService } from 'src/mail/mail.service';
 
@@ -26,7 +26,19 @@ export class OrderService {
   
         cartItems = await prisma.cartItem.findMany({
           where: { cart: { user_id: userId } },
-          include: { product: true }
+          include: {
+            product: {
+              include: {
+                GeneralProduct: true, 
+                Color: true,         
+                Size_Amount: {
+                  include: {
+                    Size: true  
+                  }
+                }
+              }
+            }
+          }
         });
   
         if (cartItems.length === 0) {
@@ -52,6 +64,8 @@ export class OrderService {
             }
           })
         ));
+
+        await this.updateProductStock(cartItems);
   
         await prisma.cart.update({
           where: { user_id: userId },
@@ -78,7 +92,8 @@ export class OrderService {
 
   private buildOrderConfirmationEmail(order, cartItems): string {
     const itemsHtml = cartItems.map(item => `
-      <li>${item.product.name}: ${item.product_quantity} x $${item.product.value.toFixed(2)} = $${(item.product_quantity * item.product.value).toFixed(2)}</li>
+      <img src="${item.product.image_url}" alt="${item.product.GeneralProduct.general_product_name}" style="width:100px;height:auto;">
+      <li> Product: ${item.product.GeneralProduct.general_product_name} - Color: ${item.product.Color.color_name} - Size: ${item.product.Size_Amount.Size.size_type}: - Quantity: ${item.product_quantity} x $${item.product.value.toFixed(2)} = $${(item.product_quantity * item.product.value).toFixed(2)}</li>
     `).join('');
   
     return `
@@ -90,4 +105,31 @@ export class OrderService {
       <p>Thank you for your purchase!</p>
     `;
   }
+
+
+
+  async updateProductStock(cartItems: CartDisplayDto[]): Promise<void> {
+    console.log('Items to reduce stock: ', cartItems)
+    try {
+      await this.prisma.$transaction(async prisma => {
+        for (const item of cartItems) {
+          const product = await prisma.product.findUnique({
+            where: { product_id: item.product_id },
+            include: { Size_Amount: true }
+          });
+
+          if (product && product.Size_Amount) {
+            await prisma.size_Amount.update({
+              where: { size_amount_id: product.size_amount_id },
+              data: { size_amount: { decrement: item.product_quantity } }
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Failed to update product stock:', error);
+      throw new HttpException('Failed to update product stock', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  
 }

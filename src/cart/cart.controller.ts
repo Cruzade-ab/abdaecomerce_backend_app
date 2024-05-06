@@ -13,24 +13,25 @@ export class CartController {
 
   // Controlador para añadir un producto al carrito
   @Post('addToCart')
-  async addToCart(
+async addToCart(
     @Req() request: Request,
     @Body('productId') productId: number,
     @Body('quantity') quantity: number,
     @Res() response: Response
-  ): Promise<any> {
+): Promise<any> {
     try {
       const user = await this.userService.getUserFromToken(request);
       if (!user) {
-        return response.status(HttpStatus.UNAUTHORIZED).json({ message: 'User not authenticated' });
+        // Improved error messaging
+        return response.status(HttpStatus.UNAUTHORIZED).json({ message: 'Authentication required: Please log in.' });
       }
       await this.cartService.addToCart(user.user_id, productId, quantity);
       return response.status(HttpStatus.OK).json({ message: 'Product added to cart successfully' });
     } catch (error) {
       console.error("Error when adding to cart:", error);
-      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error', error: error.message });
+      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to add product to cart', error: error.message });
     }
-  }
+}
 
   // Controlador para obtener la información del carrito
   @Get('getCartInfo')
