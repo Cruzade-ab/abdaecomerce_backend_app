@@ -19,20 +19,24 @@ describe('UserService', () => {
   let jwtService: JwtService;
 
   beforeEach(async () => {
+
+    jest.clearAllMocks();
+
     mockUsers = [
       { user_id: 1, name: 'User 1', last_name: 'Last Name 1', email: 'user1@example.com', password: 'password1', role_id: 1 },
       { user_id: 2, name: 'User 2', last_name: 'Last Name 2', email: 'user2@example.com', password: 'password2', role_id: 1 },
       { user_id: 3, name: 'User 3', last_name: 'Last Name 3', email: 'user3@example.com', password: 'password3', role_id: 1 },
     ];
+
   
     const mockPrismaService = {
       user: {
         findMany: jest.fn().mockResolvedValue(mockUsers),
         create: jest.fn(),
-        findFirst: jest.fn().mockResolvedValue(mockUsers),
+        findFirst: jest.fn().mockResolvedValue(mockUsers[0]), // Assuming you want to resolve the first user for testing
       },
     };
-
+  
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         JwtModule.register({
@@ -63,7 +67,11 @@ describe('UserService', () => {
     userService = module.get<UserService>(UserService);
     prismaService = module.get<PrismaService>(PrismaService);
     jwtService = module.get<JwtService>(JwtService);
+  
+    // Aquí añades el mock de signAsync
+    jest.spyOn(jwtService, 'signAsync').mockResolvedValue('mockedToken');
   });
+  
   
 
   // Prueba del Register
@@ -88,7 +96,7 @@ describe('UserService', () => {
 
 
   // Prueba de fallo en el Register
-it('debe manejar correctamente los errores al intentar crear un usuario', async () => {
+  it('debe manejar correctamente los errores al intentar crear un usuario', async () => {
   const userData: User = {
     user_id: 1,
     name: 'Nombre',
@@ -257,33 +265,38 @@ it('debe manejar correctamente los errores al intentar crear un usuario', async 
     expect(result).toBeNull();
   });
 
-  it('should create a JWT token', async () => {
-    // Arrange
-    const user = {
+
+  it('should create a JWT token without including the password', async () => {
+    const user: User = {
       user_id: 1,
       name: 'Test',
       last_name: 'User',
       email: 'user@example.com',
-      password: 'hashedPassword', // Include the password property
+      password: 'hashedPassword', // Aquí es donde se está pasando la contraseña
       role_id: 1,
     };
-    const token = 'mockedToken';
-    jest.spyOn(jwtService, 'signAsync').mockResolvedValue(token);
-
+  
+    const expectedPayload = {
+      user_id: user.user_id,
+      name: user.name,
+      last_name: user.last_name,
+      email: user.email,
+      role_id: user.role_id, // No incluir la contraseña en el payload
+    };
+  
+    console.log('Before signAsync call. Expected payload:', expectedPayload);
+  
     // Act
     const result = await userService.createToken(user);
-
+  
+    console.log('After signAsync call. Result:', result);
+  
     // Assert
-    expect(result).toEqual(token);
-    expect(jwtService.signAsync).toHaveBeenCalledWith({
-      user_id: 1,
-      name: 'Test',
-      last_name: 'User',
-      email: 'user@example.com',
-      password: 'hashedPassword', // Include the password property
-      role_id: 1,
-    });
+    expect(jwtService.signAsync).toHaveBeenCalledWith(expectedPayload); // Verificar que el método se llamó con el payload correcto
+    expect(result).toEqual('mockedToken'); // Verificar que el resultado sea el token
   });
-
+  
+  
+  
 
 }); 
