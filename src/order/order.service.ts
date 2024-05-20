@@ -102,7 +102,7 @@ export class OrderService {
       <p>Details:</p>
       <ul>${itemsHtml}</ul>
       <p>Total Order Value: $${order.order_total.toFixed(2)}</p>
-      <p>Thank you for your purchase!</p>
+      <p>Thank you for your order!</p>
     `;
   }
 
