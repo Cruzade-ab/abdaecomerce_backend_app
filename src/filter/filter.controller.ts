@@ -3,7 +3,7 @@ import { FilterService } from './filter.service';
 import { GeneralProductDTO } from 'src/dto/products_dto';
 
 @Injectable()
-@Controller('/api/filter')
+@Controller('/api/products/filter')
 export class FilterController {
   constructor(private readonly filterService: FilterService) { }
 
