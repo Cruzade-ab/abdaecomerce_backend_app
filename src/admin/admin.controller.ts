@@ -2,6 +2,7 @@ import { Injectable, Controller, Post, UseInterceptors, Body, UploadedFiles, Put
 import { PrismaService } from "src/prisma/prisma.service";
 import { AnyFilesInterceptor } from "@nestjs/platform-express";
 import { ProductReceived } from "src/dto/product_recived";
+import { EditProductReceived } from "src/dto/product_edit_recived";
 import { AdminService } from "./admin.service";
 import { Product } from "src/dto/products_dto";
 
@@ -29,9 +30,9 @@ export class AdminController {
     @Put('/product/update')
     @UseInterceptors(AnyFilesInterceptor())
     async updateProduct(
-        @Body() product: ProductReceived,
+        @Body() product: EditProductReceived,
         @UploadedFiles() files: Express.Multer.File[],
-    ): Promise<ProductReceived>{
+    ): Promise<EditProductReceived>{
         console.log('Received product:', product);
         console.log('Received files:', files);
         console.log('Entering createProduct method');

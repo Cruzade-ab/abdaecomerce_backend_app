@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { ProductReceived } from "src/dto/product_recived";
+import { EditProductReceived } from "src/dto/product_edit_recived";
 import { CloudinaryService } from "src/cloudinary/cloudinary.service";
 @Injectable()
 export class AdminService {
@@ -117,7 +118,7 @@ export class AdminService {
     }
 
 
-    async updateProduct(data: ProductReceived, files: Express.Multer.File[]): Promise<ProductReceived> {
+    async updateProduct(data: EditProductReceived, files: Express.Multer.File[]): Promise<EditProductReceived> {
         return ;
         // try {
         //     let existingBrand = await this.prisma.brand.findFirst({
