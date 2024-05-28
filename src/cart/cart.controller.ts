@@ -62,4 +62,16 @@ async addToCart(
     }
   }
 
+  @Get('itemCount')
+  async getCartItemCount(@Req() request: Request): Promise<number> {
+    const user = await this.userService.getUserFromToken(request);
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    console.log("user id: " , user.user_id);
+    return this.cartService.getCartItemCount(user.user_id);
+  }
+
+  
+
 }

@@ -5,3 +5,4 @@ export class CartDisplayDto {
   readonly size_available: number;
   readonly image_url: string;
 }
+
