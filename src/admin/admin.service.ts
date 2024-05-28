@@ -123,6 +123,7 @@ export class AdminService {
     async updateProduct(data: EditProductReceived, files: Express.Multer.File[]): Promise<EditProductReceived> {
       return
     }
+
     async deleteColor(data: DeleteProductId): Promise<DeleteProductId> {
         const { general_product_id, color_id } = data;
     
@@ -177,6 +178,23 @@ export class AdminService {
         });
     
         console.log(`Deleted products result: ${JSON.stringify(deleteResult)}`);
+    
+        // Check if there are any remaining products with the same general_product_id
+        const remainingProducts = await this.prisma.product.findMany({
+          where: {
+            general_product_id: Number(general_product_id),
+          },
+        });
+    
+        if (remainingProducts.length === 0) {
+          // Delete the general product if there are no remaining products
+          await this.prisma.generalProduct.delete({
+            where: {
+              general_product_id: Number(general_product_id),
+            },
+          });
+          console.log(`Deleted general product with general_product_id: ${general_product_id}`);
+        }
     
         return data;
       }
