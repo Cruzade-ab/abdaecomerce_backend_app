@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Req, Body, Res,HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Req, Body, Res,HttpException, HttpStatus, Param, ParseIntPipe } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { UserService } from 'src/user/user.service';
 import { CartDisplayDto } from 'src/dto/cart-item.dto';
@@ -60,6 +60,12 @@ async addToCart(
       console.error("Error al eliminar el elemento del carrito:", error);
       return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error del Servidor Interno', error: error.message });
     }
+  }
+
+  @Get('count/:userId')
+  async getCartItemCount(@Param('userId', ParseIntPipe) userId: number): Promise<{ count: number }> {
+    const count = await this.cartService.getCartItemCount(userId);
+    return { count };
   }
 
 }

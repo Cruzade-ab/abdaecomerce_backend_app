@@ -163,4 +163,19 @@ export class CartService {
     // return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error', error: error.message });
     //pero NO Http Status
   }
+
+  // consigue la cantidad de articulos en el carrito de compras del usuario. 
+  async getCartItemCount(userId: number): Promise<number> {
+    const cart = await this.prisma.cart.findUnique({
+      where: { user_id: userId },
+      include: { cartItems: true },
+    });
+
+    if (!cart) {
+      return 0; // Si no hay carrito, retorna 0
+    }
+
+    const itemCount = cart.cartItems.reduce((total, item) => total + item.product_quantity, 0);
+    return itemCount;
+  }
 }
