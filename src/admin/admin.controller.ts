@@ -1,10 +1,11 @@
-import { Injectable, Controller, Post, UseInterceptors, Body, UploadedFiles, Put, } from "@nestjs/common";
+import { Injectable, Controller, Post, UseInterceptors, Body, UploadedFiles, Put, Delete, } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AnyFilesInterceptor } from "@nestjs/platform-express";
 import { ProductReceived } from "src/dto/product_recived";
 import { EditProductReceived } from "src/dto/product_edit_recived";
 import { AdminService } from "./admin.service";
 import { Product } from "src/dto/products_dto";
+import { DeleteProductId } from "src/dto/product_edit_recived";
 
 @Controller('api/admin')
 @Injectable()
@@ -38,4 +39,17 @@ export class AdminController {
         console.log('Entering createProduct method');
         return this.adminService.updateProduct(product, files);
     }
+
+    @Delete('/product/delete/color')
+    async deleteByColor(@Body() productId: DeleteProductId  ):Promise<DeleteProductId >{
+        console.log('Received product Id:', productId)
+        return this.adminService.deleteColor(productId)
+    }
+
+    @Delete('/product/delete/generalProduct')
+    async deleteGeneralProduct(@Body()  productId: DeleteProductId ):Promise <DeleteProductId>{
+        console.log('Received product Id:', productId)
+        return this.adminService.deleteGeneralProduct(productId)
+    }
+
 }

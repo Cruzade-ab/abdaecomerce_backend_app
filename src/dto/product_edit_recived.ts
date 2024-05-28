@@ -15,3 +15,9 @@ interface ProductDetail {
   product_ids: Record<string, number>;
   sizes: Record<string, number>; 
 }
+
+
+export interface DeleteProductId {
+  general_product_id: string;
+  color_id?: string;
+}
