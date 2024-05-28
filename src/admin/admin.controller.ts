@@ -36,7 +36,7 @@ export class AdminController {
     ): Promise<EditProductReceived>{
         console.log('Received product:', product);
         console.log('Received files:', files);
-        console.log('Entering createProduct method');
+        console.log('Entering editProduct method');
         return this.adminService.updateProduct(product, files);
     }
 
