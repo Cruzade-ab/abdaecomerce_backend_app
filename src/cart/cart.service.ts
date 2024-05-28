@@ -164,18 +164,22 @@ export class CartService {
     //pero NO Http Status
   }
 
-  // consigue la cantidad de articulos en el carrito de compras del usuario. 
   async getCartItemCount(userId: number): Promise<number> {
+    console.log('Obteniendo cantidad de elementos en el carrito');
     const cart = await this.prisma.cart.findUnique({
       where: { user_id: userId },
-      include: { cartItems: true },
+      include: { cartItems: true }, // Cargar explícitamente los elementos del carrito
     });
-
+  
     if (!cart) {
       return 0; // Si no hay carrito, retorna 0
     }
-
+  
+    // Sumar la cantidad de cada elemento en el carrito
     const itemCount = cart.cartItems.reduce((total, item) => total + item.product_quantity, 0);
+    console.log('Cantidad de elementos en el carrito:', itemCount);
     return itemCount;
   }
+  
+  
 }

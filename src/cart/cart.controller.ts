@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Req, Body, Res,HttpException, HttpStatus, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Get, Req, Body, Res,HttpException, HttpStatus } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { UserService } from 'src/user/user.service';
 import { CartDisplayDto } from 'src/dto/cart-item.dto';
@@ -62,10 +62,16 @@ async addToCart(
     }
   }
 
-  @Get('count/:userId')
-  async getCartItemCount(@Param('userId', ParseIntPipe) userId: number): Promise<{ count: number }> {
-    const count = await this.cartService.getCartItemCount(userId);
-    return { count };
+  @Get('itemCount')
+  async getCartItemCount(@Req() request: Request): Promise<number> {
+    const user = await this.userService.getUserFromToken(request);
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    console.log("user id: " , user.user_id);
+    return this.cartService.getCartItemCount(user.user_id);
   }
+
+  
 
 }
